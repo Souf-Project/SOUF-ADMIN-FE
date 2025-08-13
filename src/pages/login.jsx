@@ -1,0 +1,100 @@
+import Input from "../components/input";
+import loginImg from "../assets/images/loginImg.svg";
+
+
+export default function Login() {
+  
+
+  return (
+    <>
+    <div className="w-screen lg:h-screen h-full flex flex-col lg:flex-row bg-yellow-main">
+      {/* PC 버전 스프 설명 */}
+      <div className="hidden lg:block lg:w-1/2 my-auto  bg-[#FFE681] flex flex-col px-16 justify-center">
+        <div className="my-auto ">
+          <h1 className="text-8xl font-bold mb-6">SouF</h1>
+          <p className="text-4xl font-bold leading-relaxed text-gray-800 mb-10">
+            합리적인 비용으로
+            <br />
+            필요한 인재를 만나보세요!
+            <br />
+            지금 바로 스프에서!
+          </p>
+          <div className="mt-20 w-1/2 h-auto ml-auto">
+            <img src={loginImg} className=" w-full" />
+          </div>
+        </div>
+      </div>
+      {/* 모바일 버전 스프 설명 */}
+  <div className="lg:hidden flex justify-center items-center mt-24 mb-8 ">
+          <h1 className="text-3xl font-bold">SouF</h1>
+          <span className="w-[2px] h-20 bg-black mx-4"></span>
+         
+          <p className="text-xl font-bold leading-relaxed text-gray-800">
+            합리적인 비용으로
+            <br />
+            필요한 인재를 만나보세요!
+            <br />
+            지금 바로 스프에서!
+          </p>
+         
+        </div>
+        <div className="w-full lg:w-1/2 lg:bg-white flex flex-col justify-center items-center px-4 h-full">
+  <h2 className="text-3xl lg:text-6xl font-bold mb-10 mx-auto">로그인</h2>
+     <form
+        
+        onSubmit={(e) => {
+          e.preventDefault();
+           console.log('폼 제출됨');
+          loginMutation.mutate({ email, password })}}
+        className="w-full max-w-sm bg-white p-6 lg:p-8 border rounded-xl shadow"
+      >
+          <Input
+            title="이메일"
+            // isValidateTrigger={isValidateTrigger}
+            // isConfirmed={isConfirmed}
+            placeholder="Souf@souf.com"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setShowError(false);
+            }}
+            essentialText="이메일을 입력해주세요"
+            disapproveText="이메일을 입력해주세요"
+            // onValidChange={onValidChange}
+          />
+          <Input
+            title="비밀번호"
+            // isValidateTrigger={isValidateTrigger}
+            // isConfirmed={isConfirmed}
+            type="password"
+            placeholder=""
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setShowError(false);
+            }}
+            essentialText="비밀번호를 입력해주세요"
+            disapproveText="비밀번호를 입력해주세요"
+            // onValidChange={onValidChange}
+          />
+          {showError && (
+            <div className="mt-10 text-red-essential text-center">아이디 또는 비밀번호가 일치하지 않습니다.</div>
+          )}
+          <div className="flex justify-between text-[#767676] text-xl font-reagular">
+            <button type="button" onClick={() => navigate("/join")}>회원가입</button>
+            <button type="button" onClick={() => navigate("/pwdFind")}>
+              비밀번호 재설정
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="bg-yellow-main mx-auto w-36 h-12 rounded-xl text-2xl font-bold"
+            >
+              로그인
+            </button>
+          </div>
+           </form>
+      </div>
+    </div>
+    </>
+  );
+}
