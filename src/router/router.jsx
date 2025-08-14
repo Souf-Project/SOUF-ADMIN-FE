@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/login";
+import PwdFind from "../pages/pwdFind";
 
 function AppRouter() {
 
@@ -7,7 +8,8 @@ function AppRouter() {
     <div className="flex flex-col min-h-screen">
         <main>
             <Routes>
-                <Route path="/" element={<Login/>}/>
+                <Route path="/login" element={<Login/>}/>
+                <Route path="/pwdFind" element={<PwdFind/>}/>
             </Routes>
         </main>
     </div>
