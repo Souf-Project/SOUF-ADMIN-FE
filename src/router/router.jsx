@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "../pages/login";
 
 function AppRouter() {
 
@@ -6,7 +7,7 @@ function AppRouter() {
     <div className="flex flex-col min-h-screen">
         <main>
             <Routes>
-                <Route/>
+                <Route path="/" element={<Login/>}/>
             </Routes>
         </main>
     </div>

@@ -1,98 +1,85 @@
-import Input from "../components/input";
-import loginImg from "../assets/images/loginImg.svg";
-
+import Input from "../components/common/input/input";
+import SoufLogo from "../assets/images/SouFLogo.svg";
+import Button from "../components/common/button/button";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function Login() {
-  
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showError, setShowError] = useState(false);
+
+
+  const handleLoginClick = () => {  };
+
+
 
   return (
     <>
-    <div className="w-screen lg:h-screen h-full flex flex-col lg:flex-row bg-yellow-main">
+    <div className="w-screen h-screen h-full flex flex-col lg:flex-row bg-yellow-main">
       {/* PC 버전 스프 설명 */}
-      <div className="hidden lg:block lg:w-1/2 my-auto  bg-[#FFE681] flex flex-col px-16 justify-center">
-        <div className="my-auto ">
-          <h1 className="text-8xl font-bold mb-6">SouF</h1>
-          <p className="text-4xl font-bold leading-relaxed text-gray-800 mb-10">
-            합리적인 비용으로
-            <br />
-            필요한 인재를 만나보세요!
-            <br />
-            지금 바로 스프에서!
-          </p>
-          <div className="mt-20 w-1/2 h-auto ml-auto">
-            <img src={loginImg} className=" w-full" />
-          </div>
-        </div>
+      <div className="hidden lg:flex lg:w-1/2 h-full my-auto bg-[#FFE681] flex-col px-16 justify-center items-center">
+        <p className="text-center text-5xl font-bold leading-relaxed text-gray-800 mb-10">
+          관리자 페이지
+          <img src={SoufLogo} alt="SouF Logo" className="mx-auto mt-4"/>
+          <span className="text-3xl">SouF | 대학생 외주 & 공모전</span>
+        </p>
       </div>
       {/* 모바일 버전 스프 설명 */}
-  <div className="lg:hidden flex justify-center items-center mt-24 mb-8 ">
-          <h1 className="text-3xl font-bold">SouF</h1>
+      <div className="lg:hidden flex justify-center items-center mt-24 mb-24 sm:mb-2">
+          <img src={SoufLogo} alt="SouF Logo" className="w-20"/>
           <span className="w-[2px] h-20 bg-black mx-4"></span>
-         
           <p className="text-xl font-bold leading-relaxed text-gray-800">
-            합리적인 비용으로
+            관리자 페이지
             <br />
-            필요한 인재를 만나보세요!
-            <br />
-            지금 바로 스프에서!
+            대학생 외주 & 공모전
           </p>
          
         </div>
-        <div className="w-full lg:w-1/2 lg:bg-white flex flex-col justify-center items-center px-4 h-full">
-  <h2 className="text-3xl lg:text-6xl font-bold mb-10 mx-auto">로그인</h2>
-     <form
-        
-        onSubmit={(e) => {
-          e.preventDefault();
-           console.log('폼 제출됨');
-          loginMutation.mutate({ email, password })}}
-        className="w-full max-w-sm bg-white p-6 lg:p-8 border rounded-xl shadow"
-      >
-          <Input
-            title="이메일"
-            // isValidateTrigger={isValidateTrigger}
-            // isConfirmed={isConfirmed}
-            placeholder="Souf@souf.com"
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setShowError(false);
-            }}
-            essentialText="이메일을 입력해주세요"
-            disapproveText="이메일을 입력해주세요"
-            // onValidChange={onValidChange}
-          />
-          <Input
-            title="비밀번호"
-            // isValidateTrigger={isValidateTrigger}
-            // isConfirmed={isConfirmed}
-            type="password"
-            placeholder=""
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setShowError(false);
-            }}
-            essentialText="비밀번호를 입력해주세요"
-            disapproveText="비밀번호를 입력해주세요"
-            // onValidChange={onValidChange}
-          />
-          {showError && (
-            <div className="mt-10 text-red-essential text-center">아이디 또는 비밀번호가 일치하지 않습니다.</div>
-          )}
-          <div className="flex justify-between text-[#767676] text-xl font-reagular">
-            <button type="button" onClick={() => navigate("/join")}>회원가입</button>
-            <button type="button" onClick={() => navigate("/pwdFind")}>
-              비밀번호 재설정
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              className="bg-yellow-main mx-auto w-36 h-12 rounded-xl text-2xl font-bold"
-            >
-              로그인
-            </button>
-          </div>
-           </form>
+        <div className="w-full lg:w-1/2 lg:bg-white flex flex-col justify-center items-center px-4 sm:h-full">
+          <div className="text-3xl lg:text-5xl font-bold mb-10">로그인</div>
+            <form className="w-full max-w-lg bg-white p-6 lg:p-8 border rounded-xl shadow flex flex-col gap-4"
+            onSubmit={handleLoginClick}>
+              <Input
+                title="이메일"
+                placeholder="Souf@souf.com"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setShowError(false);
+                }}
+                essentialText="이메일을 입력해주세요"
+                disapproveText="이메일을 입력해주세요"/>
+              <Input
+                title="비밀번호"
+                type="password"
+                placeholder=""
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setShowError(false);
+                }}
+                essentialText="비밀번호를 입력해주세요"
+                disapproveText="비밀번호를 입력해주세요"
+              />
+              {showError && (
+                <div className="mt-2 text-red-essential text-center">아이디 또는 비밀번호가 일치하지 않습니다.</div>
+              )}
+              <div className="flex justify-between text-[#767676] text-xl font-reagular">
+                <button type="button" 
+                  className="bg-white underline underline-offset-4 decoration-gray-300 p-0"
+                  onClick={() => navigate("/join")}>
+                  회원가입</button>
+
+                <button type="button"
+                  className="bg-white underline underline-offset-4 decoration-gray-300 p-0"
+                  onClick={() => navigate("/pwdFind")}>
+                  비밀번호 재설정
+                </button>
+              </div>
+              <div className="flex justify-center">
+                <Button btnText="로그인" width="w-1/2"/>
+              </div>
+        </form>     
       </div>
     </div>
     </>
