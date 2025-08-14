@@ -18,7 +18,7 @@ export default function PwdFind() {
    return (
     <AuthLayout title="비밀번호 재설정">
       <form
-        className="w-full max-w-lg bg-white p-6 lg:p-8 border rounded-xl shadow flex flex-col gap-4"
+        className="w-full max-w-lg bg-white p-6 lg:p-8 border rounded-xl shadow flex flex-col gap-6"
         onSubmit={handleLoginClick}
       >
         <ButtonInput
