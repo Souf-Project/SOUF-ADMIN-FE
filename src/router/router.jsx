@@ -1,13 +1,28 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Login from "../pages/login";
+import PwdFind from "../pages/pwdFind";
+import Members from "../pages/members";
+import Posts from "../pages/posts";
+import Advertisements from "../pages/advertisements";
+import Reports from "../pages/reports";
+import Header from "../components/common/header";
 
 function AppRouter() {
+  const location = useLocation();
+  const noHeaderPaths = ["/login", "/pwdFind"]; // Header 없는 페이지 경로
+  const isNoHeaderPage = noHeaderPaths.includes(location.pathname);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-screen">
+        {!isNoHeaderPage && <Header />}
         <main>
             <Routes>
-                <Route path="/" element={<Login/>}/>
+                <Route path="/login" element={<Login/>}/>
+                <Route path="/pwdFind" element={<PwdFind/>}/>
+                <Route path="/members" element={<Members />} />
+                <Route path="/posts" element={<Posts />} />
+                <Route path="/advertisements" element={<Advertisements />} />
+                <Route path="/reports" element={<Reports />} />
             </Routes>
         </main>
     </div>
