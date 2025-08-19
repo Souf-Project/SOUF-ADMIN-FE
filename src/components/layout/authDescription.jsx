@@ -1,4 +1,3 @@
-// src/components/auth/AuthDescription.jsx
 import { useMediaQuery } from 'react-responsive';
 import SoufLogo from '../../assets/images/SouFLogo.svg';
 
