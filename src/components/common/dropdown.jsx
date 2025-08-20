@@ -1,5 +1,7 @@
 import { useState } from "react";
-
+import fillCheckIco from "../../assets/icon/fillCheckIco.svg";
+import noneCheckIco from "../../assets/icon/noneCheckIco.svg";
+import checkIco from "../../assets/icon/checkIco.svg";
 export default function Dropdown({
   label,
   options,
@@ -22,7 +24,6 @@ export default function Dropdown({
         <span className="font-bold mr-2">{label}</span>
         <span className="text-gray-400 mx-2">|</span>
         <span className="ml-2">{selectedLabel}</span>
-
         {/* 드롭다운 화살표 */}
         <span className="ml-2">▼</span>
       </div>
@@ -39,12 +40,10 @@ export default function Dropdown({
                 setOpen(false);
               }}
             >
-              <input
-                type="radio"
-                name={label}
-                checked={opt.value === value}
-                onChange={() => {}}
-                className="mr-2"
+              <img
+                src={checkIco}
+                alt={opt.value === value ? "선택됨" : "선택되지 않음"}
+                className={`mr-2 w-4 h-4 ${opt.value === value ? '' : 'opacity-50 grayscale'}`}
               />
               {opt.label}
             </div>
