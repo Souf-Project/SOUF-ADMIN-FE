@@ -23,43 +23,31 @@ export default function Members() {
 const getMemberData = async () => {
   try {
     const response = await getMember({page: currentPage, size: pageSize});
-    console.log("회원 데이터:", response);
-    
-    // API 응답에서 실제 데이터 추출 (응답 구조에 따라 조정 필요)
-    if (response && response.data) {
-      setPaginationData(response.data.content || response.data);
-      setTotalPages(Math.ceil((response.data.totalElements || response.data.length) / pageSize));
-    }
+
+      if (response && response.result && response.result.content) {
+        console.log("API 응답 데이터:", response.result.content);
+        const memberData = response.result.content.map(member => ({
+          타입: member.roleType === "STUDENT" ? "학생" : member.roleType === "ADMIN" ? "관리자" : "기업",
+          이름: member.username,
+          닉네임: member.nickname,
+          이메일: member.email,
+          관리: member.isDeleted ? "탈퇴" : "활성"
+        }));
+        
+        setPaginationData(memberData);
+
+        const totalElements = response.result.totalElements || memberData.length;
+        setTotalPages(Math.ceil(totalElements / pageSize));
+      }
   } catch (error) {
     console.error("회원 데이터 조회 실패:", error);
-    // 에러 발생 시 더미 데이터 사용
-    setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-    setTotalPages(Math.ceil(data.length / pageSize));
+   
   }
 }
 
 useEffect(() => {
   getMemberData();
 }, [currentPage]);
-
-const data = [
-  { 타입: "학생", 이름: "김서현", 닉네임: "책벌레", 이메일: "booklover@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "박지훈", 닉네임: "여행가", 이메일: "traveler@example.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "최민지", 닉네임: "코딩마스터", 이메일: "codingmaster@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "이도현", 닉네임: "커피러버", 이메일: "coffee@demo.net", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "정예린", 닉네임: "음악매니아", 이메일: "musicfan@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "오세훈", 닉네임: "야구소년", 이메일: "baseball@test.org", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "한수진", 닉네임: "그림쟁이", 이메일: "artist@mail.com", 관리: "탈퇴" },
-  { 타입: "기업", 이름: "스타트업A", 닉네임: "창업드림", 이메일: "startupA@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "조민호", 닉네임: "맛집헌터", 이메일: "foodhunter@test.org", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "양지우", 닉네임: "캠핑족", 이메일: "camping@demo.net", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "서가영", 닉네임: "드라마퀸", 이메일: "dramaqueen@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "홍승우", 닉네임: "헬스매니아", 이메일: "fitness@test.org", 관리: "탈퇴" },
-  { 타입: "기업", 이름: "테크기업B", 닉네임: "혁신리더", 이메일: "techB@mail.com", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "배유진", 닉네임: "고양이집사", 이메일: "catlover@test.org", 관리: "탈퇴" },
-  { 타입: "학생", 이름: "임하늘", 닉네임: "사진작가", 이메일: "photographer@demo.net", 관리: "탈퇴" }
-]
-
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -77,10 +65,7 @@ const data = [
     console.log("검색어:", value);
   };
 
-  useEffect( () => {
-    setPaginationData(data.slice(currentPage*pageSize , (currentPage+1)*pageSize));
-    setTotalPages(Math.ceil(data.length/pageSize));
-  },[currentPage]);
+  // 이 useEffect는 제거 - getMemberData에서 처리함
   
   return (
     <AdminLayout
