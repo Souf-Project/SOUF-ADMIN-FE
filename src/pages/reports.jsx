@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
+import { getReport } from "../api/report";
 
 export default function Reports() {
   const [typeFilter, setTypeFilter] = useState("recruit");
@@ -21,6 +22,15 @@ export default function Reports() {
     { key: "사유", value: "사유" },
     { key: "작성자", value: "작성자" },
   ];
+
+  const getReportData = async () => {
+    const response = await getReport({page: currentPage, size: pageSize});
+    console.log("API 응답 데이터:", response);
+  }
+
+  useEffect(() => {
+    getReportData();
+  }, [currentPage]);
 
   // 더미 데이터
   const data = [
@@ -69,7 +79,7 @@ export default function Reports() {
   useEffect(() => {
     setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
     setTotalPages(Math.ceil(data.length / pageSize));
-  }, [currentPage, data]);
+  }, [currentPage]);
 
   return (
     <AdminLayout
