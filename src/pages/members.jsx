@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getMember } from "../api/member";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
@@ -18,6 +19,29 @@ export default function Members() {
   { key: "이메일", value: "이메일" },
   { key: "관리", value: "관리" },
 ];
+
+const getMemberData = async () => {
+  try {
+    const response = await getMember({page: currentPage, size: pageSize});
+    console.log("회원 데이터:", response);
+    
+    // API 응답에서 실제 데이터 추출 (응답 구조에 따라 조정 필요)
+    if (response && response.data) {
+      setPaginationData(response.data.content || response.data);
+      setTotalPages(Math.ceil((response.data.totalElements || response.data.length) / pageSize));
+    }
+  } catch (error) {
+    console.error("회원 데이터 조회 실패:", error);
+    // 에러 발생 시 더미 데이터 사용
+    setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+    setTotalPages(Math.ceil(data.length / pageSize));
+  }
+}
+
+useEffect(() => {
+  getMemberData();
+}, [currentPage]);
+
 const data = [
   { 타입: "학생", 이름: "김서현", 닉네임: "책벌레", 이메일: "booklover@mail.com", 관리: "탈퇴" },
   { 타입: "학생", 이름: "박지훈", 닉네임: "여행가", 이메일: "traveler@example.com", 관리: "탈퇴" },
@@ -56,7 +80,7 @@ const data = [
   useEffect( () => {
     setPaginationData(data.slice(currentPage*pageSize , (currentPage+1)*pageSize));
     setTotalPages(Math.ceil(data.length/pageSize));
-  },[currentPage,data]);
+  },[currentPage]);
   
   return (
     <AdminLayout
