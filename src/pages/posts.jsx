@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
+import { getPost } from "../api/post";
 
 export default function Posts() {
   const [typeFilter, setTypeFilter] = useState("recruit");
@@ -19,6 +20,45 @@ export default function Posts() {
     { key: "작성일", value: "작성일" },
     { key: "관리", value: "관리" },
   ];
+
+  const getPostData = async () => {
+    try {
+      const response = await getPost({
+        page: currentPage, 
+        size: pageSize,
+        postType: typeFilter
+      });
+      console.log("currentPage", currentPage);
+      console.log("pageSize", pageSize);
+      console.log("typeFilter", typeFilter);
+
+      console.log("API 응답 데이터:", response);
+
+      if (response && response.result && response.result.content) {
+        console.log("API 응답 데이터:", response.result.content);
+        const postData = response.result.content.map(post => ({
+          타입: post.postType === "RECRUIT" ? "공고문" : "피드",
+          작성자: post.writer,
+          제목: post.title,
+          작성일: post.createdAt,
+          관리: ">"
+        }));
+        
+        setPaginationData(postData);
+        const totalElements = response.result.totalElements || postData.length;
+        setTotalPages(Math.ceil(totalElements / pageSize));
+      }
+    } catch (error) {
+      console.error("게시글 데이터 조회 실패:", error);
+      // 에러 발생 시 더미 데이터 사용
+      setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+      setTotalPages(Math.ceil(data.length / pageSize));
+    }
+  }
+
+  useEffect(() => {
+    getPostData();
+  }, [currentPage, typeFilter]); // typeFilter가 변경될 때도 API 호출
 
   const data = [
     { 타입: "공고문", 작성자: "스타트업A", 제목: "프론트엔드 개발자 모집", 작성일: "2025-08-01", 관리: ">" },
@@ -57,7 +97,7 @@ export default function Posts() {
   useEffect(() => {
     setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
     setTotalPages(Math.ceil(data.length / pageSize));
-  }, [currentPage, data]);
+  }, [currentPage]);
 
   return (
     <AdminLayout
@@ -67,8 +107,8 @@ export default function Posts() {
           label: "타입",
           value: typeFilter,
           options: [
-            { label: "공고문", value: "recruit" },
-            { label: "피드", value: "feed" },
+            { label: "공고문", value: "RECRUIT" },
+            { label: "피드", value: "FEED" },
           ],
           onFilterChange: handleFilterChange,
         },

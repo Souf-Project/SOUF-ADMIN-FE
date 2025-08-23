@@ -1,8 +1,10 @@
 import { useLocation } from "react-router-dom";
+import { useUserStore } from "../../store/userStore";
 
 export default function Header() {
-  const location =useLocation();
-    const adminName = "태쿠자";
+  const location = useLocation();
+  const { nickname } = useUserStore();
+  const adminName = nickname || "관리자";
   const menus = [
     { label: "회원 관리", href: "/members" },
     { label: "게시글 관리", href: "/posts" },

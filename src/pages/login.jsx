@@ -3,14 +3,54 @@ import Input from "../components/common/input/input";
 import Button from "../components/common/button/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { postLogin } from "../api/auth";
+import { useUserStore } from "../store/userStore";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
+  const { setUser, setAccessToken } = useUserStore();
 
-  const handleLoginClick = () => {  };
+  const handleLoginClick = async (e) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setShowError(true);
+      return;
+    }
+
+    try {
+      const response = await postLogin({ email, password });
+      console.log("로그인 성공:", response);
+      
+      
+      // 로그인 성공 시 userStore와 localStorage에 저장
+      if (response.result && response.result.accessToken) {
+        // userStore에 사용자 정보 저장
+        setUser({
+          memberId: response.result.memberId,
+          nickname: response.result.nickname,
+          roleType: response.result.roleType,
+        });
+        
+        // userStore에 액세스 토큰 저장
+        setAccessToken(response.result.accessToken);
+        
+        // localStorage에도 저장 (필요한 경우)
+        localStorage.setItem("accessToken", response.result.accessToken);
+        localStorage.setItem("memberId", response.result.memberId);
+        localStorage.setItem("nickname", response.result.nickname);
+        
+        // 로그인 성공 후 메인 페이지로 이동
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      setShowError(true);
+    }
+  };
 
 
 
@@ -55,7 +95,12 @@ export default function Login() {
           </button>
         </div>
         <div className="flex justify-center">
-          <Button btnText="로그인" width="w-1/2" />
+          <Button 
+            btnText="로그인" 
+            width="w-1/2" 
+            type="submit"
+            onClick={handleLoginClick}
+          />
         </div>
       </form>
     </AuthLayout>
