@@ -13,7 +13,7 @@ function AppRouter() {
   const isNoHeaderPage = noHeaderPaths.includes(location.pathname);
 
   return (
-    <div className="flex flex-col min-h-screen w-screen">
+    <div className="flex flex-col min-h-screen w-full">
         {!isNoHeaderPage && <Header />}
         <main>
             <Routes>
