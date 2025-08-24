@@ -4,13 +4,14 @@ import Tabs from "../../components/common/tab/tabs";
 import ImageReplace from "../../components/advertisements/imageReplace";
 import SouFLogo from "../../assets/images/SouFLogo.svg";
 import MainHorizontal from "../../components/advertisements/mainHorizontal";
+import MainRecruit from "../../components/advertisements/mainRecruit";
 
 const tabComponents = {
   "메인 가로형": (
     <MainHorizontal/>
   ),
   "메인 스프 추천 공고": <div>여기에 스프 추천 공고 UI</div>,
-  "메인 공모전": <div>여기에 공모전 관련 UI</div>,
+  "메인 공모전": <MainRecruit/>,
   "공고문 모아보기": <div>여기에 공고문 리스트 UI</div>,
 };
 
