@@ -7,6 +7,7 @@ export default function AdminLayout({
   onFilterChange = () => {},
   searchPlaceholder = "검색어를 입력하세요",
   onSearchChange = () => {},
+  showSearch = true,
   children, // 테이블 등 내용
 }) {
   return (
@@ -14,7 +15,7 @@ export default function AdminLayout({
       {/* 제목 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center justify-center gap-4">
-            <h1 className="text-2xl font-bold">{title}</h1>
+            <h1 className="text-3xl font-bold">{title}</h1>
             <div className="flex items-center gap-4">
             {filters.map((filter, idx) => (
                 <div key={idx} className="flex items-center gap-2">
@@ -28,11 +29,13 @@ export default function AdminLayout({
             ))}
             </div>
         </div>
-        <SearchBar
-          placeholder={searchPlaceholder}
-          onChange={onSearchChange}
-          width="w-80"
-        />
+        {showSearch && (
+          <SearchBar
+            placeholder={searchPlaceholder}
+            onChange={onSearchChange}
+            width="w-80"
+          />
+        )}
       </div>
 
 
@@ -42,21 +45,3 @@ export default function AdminLayout({
     </div>
   );
 }
-
-/*
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          {filters.map((filter, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <Dropdown
-                label={filter.label}
-                options={filter.options}
-                value={filter.value}
-                onChange={filter.onFilterChange}
-              />
-            </div>
-          ))}
-        </div>
-
-        
-      </div> */

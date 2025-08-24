@@ -1,9 +1,9 @@
 import { useState } from "react";
-import AdminLayout from "../components/layout/adminLayout";
-import Tabs from "../components/common/tab/tabs";
-import ImageReplace from "../components/advertisements/imageReplace";
-import SouFLogo from "../assets/images/SouFLogo.svg";
-import MainHorizontal from "../components/advertisements/mainHorizontal";
+import AdminLayout from "../../components/layout/adminLayout";
+import Tabs from "../../components/common/tab/tabs";
+import ImageReplace from "../../components/advertisements/imageReplace";
+import SouFLogo from "../../assets/images/SouFLogo.svg";
+import MainHorizontal from "../../components/advertisements/mainHorizontal";
 
 const tabComponents = {
   "메인 가로형": (

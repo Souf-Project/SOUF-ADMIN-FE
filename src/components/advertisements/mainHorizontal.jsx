@@ -1,7 +1,9 @@
 import { useState } from "react";
 import MainHorizontalBlock from "./mainHorizontalBlock";
+import { useNavigate } from "react-router-dom";
 export default function MainHorizontal() {
   const [preview, setPreview] = useState(null);
+  const navigate = useNavigate();
 
   const mockData = [
   {
@@ -32,9 +34,10 @@ export default function MainHorizontal() {
             period={data.period}
             registration={data.registration}/>
         ))}
-        <section className="w-full bg-white text-center py-4 font-semibold text-lg">
+        <button className="w-full bg-white text-center py-4 font-semibold text-lg"
+        onClick={() => navigate("/add/mainHorizontal")}>
             + 광고 추가
-        </section>
+        </button>
     </div>
   );
 }

@@ -3,9 +3,10 @@ import Login from "../pages/login";
 import PwdFind from "../pages/pwdFind";
 import Members from "../pages/members";
 import Posts from "../pages/posts";
-import Advertisements from "../pages/advertisements";
+import Advertisements from "../pages/advertisement/advertisements";
 import Reports from "../pages/reports";
 import Header from "../components/common/header";
+import AddMainHorizontal from "../pages/advertisement/addMainHorizontal";
 
 function AppRouter() {
   const location = useLocation();
@@ -23,6 +24,7 @@ function AppRouter() {
                 <Route path="/posts" element={<Posts />} />
                 <Route path="/advertisements" element={<Advertisements />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/add/mainHorizontal" element={<AddMainHorizontal/>} />
             </Routes>
         </main>
     </div>
