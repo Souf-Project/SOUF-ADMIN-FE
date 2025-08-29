@@ -36,7 +36,7 @@ const getMemberData = async () => {
     const response = await getMember(params);
 
     if (response && response.result && response.result.content) {
-      // console.log("API 응답 데이터:", response.result.content);
+      console.log("API 응답 데이터:", response.result.content);
       const memberData = response.result.content.map(member => ({
         타입: member.roleType === "STUDENT" ? "학생" : member.roleType === "ADMIN" ? "관리자" : "기업",
         이름: member.username,
