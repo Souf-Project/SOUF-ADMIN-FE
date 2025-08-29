@@ -17,7 +17,9 @@ export default function Table({ columns, data, renderAction, onRowClick, origina
               onClick={() => onRowClick && onRowClick(row, originalData[idx])}
             >
               {columns.map((col) => (
-                <td key={col.key} className="border p-2">{row[col.key]}</td>
+                <td key={col.key} className="border p-2">
+                  {col.render ? col.render(row[col.key], row) : row[col.key]}
+                </td>
               ))}
             </tr>
           ))}

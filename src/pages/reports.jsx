@@ -22,7 +22,15 @@ export default function Reports() {
     { key: "접수일", value: "접수일" },
     { key: "사유", value: "사유" },
     { key: "작성자", value: "작성자" },
-    { key: "처리상태", value: "처리 상태" }
+    { 
+      key: "처리상태", 
+      value: "처리 상태",
+      render: (value, row) => (
+        <span className={row.처리상태색상 || "text-gray-600"}>
+          {value}
+        </span>
+      )
+    }
   ];
 
   const reasons = [
@@ -47,7 +55,7 @@ export default function Reports() {
       }
       
       const response = await getReport(params);
-      // console.log("API 응답 데이터:", response);
+      console.log("API 응답 데이터:", response);
 
       if (response && response.result && response.result.content) {
         const reportData = response.result.content.map(report => {
@@ -78,6 +86,10 @@ export default function Reports() {
                       report.status === "REVIEWING" ? "검토중" : 
                       report.status === "RESOLVED" ? "처리완료" : 
                       report.status === "REJECTED" ? "거부됨" : report.status,
+            처리상태색상: report.status === "PENDING" ? "text-gray-600" : 
+                          report.status === "REVIEWING" ? "text-blue-600" : 
+                          report.status === "RESOLVED" ? "text-green-600" : 
+                          report.status === "REJECTED" ? "text-red-600" : "text-gray-600",
             // 원본 데이터도 함께 저장
             reportedPersonId: report.reportedPersonId,
             postId: report.postId,
