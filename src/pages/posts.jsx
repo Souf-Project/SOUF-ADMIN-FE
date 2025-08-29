@@ -35,7 +35,7 @@ export default function Posts() {
       if (response && response.result && response.result.content) {
         console.log("API 응답 데이터:", response.result.content);
         const postData = response.result.content.map(post => ({
-          타입: post.postType === "RECRUIT" ? "공고문" : "피드",
+          타입: post.type === "RECRUIT" ? "공고문" : "피드",
           작성자: post.writer,
           제목: post.title,
           작성일: post.createdDate,
