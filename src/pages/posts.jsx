@@ -5,7 +5,7 @@ import Pagination from "../components/common/pagination";
 import { getPost } from "../api/post";
 
 export default function Posts() {
-  const [typeFilter, setTypeFilter] = useState("recruit");
+  const [typeFilter, setTypeFilter] = useState("RECRUIT");
   const [typeFilterDate, setTypeFilterDate] = useState("newest");
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -23,60 +23,40 @@ export default function Posts() {
 
   const getPostData = async () => {
     try {
-      const response = await getPost({
+      const params = {
         page: currentPage, 
         size: pageSize,
-        postType: typeFilter
-      });
-      console.log("currentPage", currentPage);
-      console.log("pageSize", pageSize);
-      console.log("typeFilter", typeFilter);
-
+        postType: typeFilter,
+      };
+      
+      const response = await getPost(params);
       console.log("API 응답 데이터:", response);
 
       if (response && response.result && response.result.content) {
         console.log("API 응답 데이터:", response.result.content);
         const postData = response.result.content.map(post => ({
-          타입: post.postType === "RECRUIT" ? "공고문" : "피드",
+          타입: post.type === "RECRUIT" ? "공고문" : "피드",
           작성자: post.writer,
           제목: post.title,
-          작성일: post.createdAt,
+          작성일: post.createdDate,
           관리: ">"
         }));
         
         setPaginationData(postData);
-        const totalElements = response.result.totalElements || postData.length;
-        setTotalPages(Math.ceil(totalElements / pageSize));
+
+        const totalPages = response.result.page?.totalPages || 1;
+
+        setTotalPages(totalPages);
       }
     } catch (error) {
       console.error("게시글 데이터 조회 실패:", error);
-      // 에러 발생 시 더미 데이터 사용
-      setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-      setTotalPages(Math.ceil(data.length / pageSize));
+     
     }
   }
 
   useEffect(() => {
     getPostData();
-  }, [currentPage, typeFilter]); // typeFilter가 변경될 때도 API 호출
-
-  const data = [
-    { 타입: "공고문", 작성자: "스타트업A", 제목: "프론트엔드 개발자 모집", 작성일: "2025-08-01", 관리: ">" },
-    { 타입: "공고문", 작성자: "테크기업B", 제목: "AI 연구원 채용", 작성일: "2025-08-02", 관리: ">" },
-    { 타입: "피드", 작성자: "정유진", 제목: "오늘 다녀온 맛집 후기 🍜", 작성일: "2025-08-03", 관리: ">" },
-    { 타입: "피드", 작성자: "박서연", 제목: "캠핑 다녀왔습니다⛺", 작성일: "2025-08-04", 관리: ">" },
-    { 타입: "피드", 작성자: "한지민", 제목: "코딩 스터디 모집합니다", 작성일: "2025-08-05", 관리: ">" },
-    { 타입: "피드", 작성자: "이민수", 제목: "여행 사진 공유 🌍", 작성일: "2025-08-06", 관리: ">" },
-    { 타입: "공고문", 작성자: "스타트업C", 제목: "백엔드 인턴 채용 공고", 작성일: "2025-08-07", 관리: ">" },
-    { 타입: "피드", 작성자: "최우진", 제목: "새로운 책 추천합니다 📚", 작성일: "2025-08-08", 관리: ">" },
-    { 타입: "공고문", 작성자: "글로벌기업D", 제목: "데이터 분석가 모집", 작성일: "2025-08-09", 관리: ">" },
-    { 타입: "피드", 작성자: "정예린", 제목: "헬스 루틴 공유 💪", 작성일: "2025-08-10", 관리: ">" },
-    { 타입: "피드", 작성자: "조민호", 제목: "맛집 탐방 리스트", 작성일: "2025-08-11", 관리: ">" },
-    { 타입: "공고문", 작성자: "스타트업E", 제목: "UX 디자이너 모집", 작성일: "2025-08-12", 관리: ">" },
-    { 타입: "피드", 작성자: "서가영", 제목: "드라마 추천 🎬", 작성일: "2025-08-13", 관리: ">" },
-    { 타입: "피드", 작성자: "홍승우", 제목: "헬스 식단 공유", 작성일: "2025-08-14", 관리: ">" },
-    { 타입: "공고문", 작성자: "기업F", 제목: "풀스택 개발자 모집", 작성일: "2025-08-15", 관리: ">" },
-  ];
+  }, [currentPage, typeFilter]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -94,10 +74,6 @@ export default function Posts() {
     console.log("검색어:", value);
   };
 
-  useEffect(() => {
-    setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-    setTotalPages(Math.ceil(data.length / pageSize));
-  }, [currentPage]);
 
   return (
     <AdminLayout

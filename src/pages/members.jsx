@@ -5,9 +5,9 @@ import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
 
 export default function Members() {
-  const [typeFilter, setTypeFilter] = useState("student");
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [typeFilterDate, setTypeFilterDate] = useState("student");
-
+  const [typeFilterCount, setTypeFilterCount] = useState("5");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [paginationData,setPaginationData] = useState([]);
@@ -22,32 +22,45 @@ export default function Members() {
 
 const getMemberData = async () => {
   try {
-    const response = await getMember({page: currentPage, size: pageSize});
+    const params = {
+      page: currentPage, 
+      size: pageSize,
+    };
 
-      if (response && response.result && response.result.content) {
-        console.log("API 응답 데이터:", response.result.content);
-        const memberData = response.result.content.map(member => ({
-          타입: member.roleType === "STUDENT" ? "학생" : member.roleType === "ADMIN" ? "관리자" : "기업",
-          이름: member.username,
-          닉네임: member.nickname,
-          이메일: member.email,
-          관리: member.isDeleted ? "탈퇴" : "활성"
-        }));
-        
-        setPaginationData(memberData);
+    if (typeFilter !== "ALL") {
+      params.memberType = typeFilter === "STUDENT" ? "STUDENT" : 
+                          typeFilter === "MEMBER" ? "MEMBER" : 
+                          typeFilter === "ADMIN" ? "ADMIN" : typeFilter;
+    }
+    
+    const response = await getMember(params);
 
-        const totalElements = response.result.totalElements || memberData.length;
-        setTotalPages(Math.ceil(totalElements / pageSize));
-      }
+    if (response && response.result && response.result.content) {
+      console.log("API 응답 데이터:", response.result.content);
+      const memberData = response.result.content.map(member => ({
+        타입: member.roleType === "STUDENT" ? "학생" : member.roleType === "ADMIN" ? "관리자" : "기업",
+        이름: member.username,
+        닉네임: member.nickname,
+        이메일: member.email,
+        관리: member.isDeleted ? "탈퇴" : "활성"
+      }));
+      
+      setPaginationData(memberData);
+
+      const totalElements = response.result.totalElements || memberData.length;
+      setTotalPages(Math.ceil(totalElements / pageSize));
+    }
   } catch (error) {
     console.error("회원 데이터 조회 실패:", error);
-   
+    // 에러 발생 시 더미 데이터 사용
+    setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+    setTotalPages(Math.ceil(data.length / pageSize));
   }
 }
 
 useEffect(() => {
   getMemberData();
-}, [currentPage]);
+}, [currentPage, typeFilter]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -55,8 +68,14 @@ useEffect(() => {
 
   const handleFilterChange = (value) => { 
     setTypeFilter(value);
+    setCurrentPage(0);
   };
   
+  const handleFilterCountChange = (value) => {
+    setTypeFilterCount(value);
+    setCurrentPage(0);
+  };
+
   const handleFilterDateChange = (value) => {
     setTypeFilterDate(value);
   };
@@ -65,8 +84,7 @@ useEffect(() => {
     console.log("검색어:", value);
   };
 
-  // 이 useEffect는 제거 - getMemberData에서 처리함
-  
+
   return (
     <AdminLayout
       title="회원 관리"
@@ -75,10 +93,23 @@ useEffect(() => {
           label: "타입",
           value: typeFilter,
           options: [
-            { label: "학생", value: "student" },
-            { label: "기업", value: "company" },
+            { label: "전체", value: "ALL" },
+            { label: "학생", value: "STUDENT" },
+            { label: "기업", value: "MEMBER" },
+            { label: "관리자", value: "ADMIN" },
           ],
           onFilterChange : handleFilterChange
+        },
+        {
+          label: "누적 신고 횟수",
+          value: typeFilterCount,
+          options: [
+            { label: "5회 미만", value: "5" },
+            { label: "10회 미만", value: "10" },
+            { label: "20회 미만", value: "20" },
+            { label: "20회 이상", value: "21" },
+          ],
+          onFilterChange: handleFilterCountChange,
         },
       ]}
       onFilterChange={handleFilterChange}
