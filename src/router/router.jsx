@@ -18,7 +18,7 @@ function AppRouter() {
         {!isNoHeaderPage && <Header />}
         <main>
             <Routes>
-                <Route path="/login" element={<Login/>}/>
+                <Route path="/" element={<Login/>}/>
                 <Route path="/pwdFind" element={<PwdFind/>}/>
                 <Route path="/members" element={<Members />} />
                 <Route path="/posts" element={<Posts />} />

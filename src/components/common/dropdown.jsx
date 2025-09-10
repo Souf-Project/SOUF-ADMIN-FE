@@ -19,13 +19,16 @@ export default function Dropdown({
     <div className="relative inline-block">
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center border rounded bg-white px-6 py-2 cursor-pointer"
+        className="flex items-center border rounded bg-white px-6 py-2 cursor-pointer min-w-48 justify-between"
       >
+        <div>
         <span className="font-bold mr-2">{label}</span>
         <span className="text-gray-400 mx-2">|</span>
+        </div>
+       
         <span className="ml-2">{selectedLabel}</span>
         {/* 드롭다운 화살표 */}
-        <span className="ml-2">▼</span>
+        <span className={`ml-2 transition-transform duration-400 ${open ? 'rotate-180' : ''}`}>▼</span>
       </div>
 
       {/* 옵션 박스 */}

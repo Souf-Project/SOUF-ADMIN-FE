@@ -44,7 +44,7 @@ export default function Login() {
         localStorage.setItem("nickname", response.result.nickname);
         
         // 로그인 성공 후 메인 페이지로 이동
-        navigate("/");
+        navigate("/members");
       }
     } catch (error) {
       console.error("로그인 실패:", error);

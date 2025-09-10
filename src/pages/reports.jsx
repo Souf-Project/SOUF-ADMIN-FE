@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
-import { getReport } from "../api/report";
+import { getReport, patchReport } from "../api/report";
 
 export default function Reports() {
-  const [typeFilter, setTypeFilter] = useState("recruit");
-  const [typeFilterCount, setTypeFilterCount] = useState("5");
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [typeFilterDate, setTypeFilterDate] = useState("newest");
-
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [paginationData, setPaginationData] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showDetailBox, setShowDetailBox] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const pageSize = 10;
 
   const columns = [
@@ -21,40 +22,97 @@ export default function Reports() {
     { key: "접수일", value: "접수일" },
     { key: "사유", value: "사유" },
     { key: "작성자", value: "작성자" },
+    { 
+      key: "처리상태", 
+      value: "처리 상태",
+      render: (value, row) => (
+        <span className={row.처리상태색상 || "text-gray-600"}>
+          {value}
+        </span>
+      )
+    }
   ];
 
+  const reasons = [
+    {label: "개인정보 노출", value: 1},
+    {label: "폭력성", value: 2}, 
+    {label: "선정성", value: 3}, 
+    {label: "부적절한 닉네임/이미지", value: 4},
+    {label: "욕설/인신공격", value: 5}, 
+    {label: "저작권 침해", value: 6}, 
+    {label: "도배", value: 7}, 
+    {label: "기타", value: 8},
+  ]
   const getReportData = async () => {
-    const response = await getReport({page: currentPage, size: pageSize});
-    console.log("API 응답 데이터:", response);
+    try {
+      const params = {
+        page: currentPage, 
+        size: pageSize,
+      };
+
+      if (typeFilter !== "ALL") {
+        params.postType = typeFilter;
+      }
+      
+      const response = await getReport(params);
+      console.log("API 응답 데이터:", response);
+
+      if (response && response.result && response.result.content) {
+        const reportData = response.result.content.map(report => {
+          const reasonTexts = report.reasons.map(reasonId => {
+            const reason = reasons.find(r => r.value === reasonId);
+            return reason ? reason.label : `사유 ${reasonId}`;
+          }).join(', ');
+          
+          return {
+            타입: report.postType === "FEED" ? "피드" : 
+                  report.postType === "RECRUIT" ? "공고문" : 
+                  report.postType === "COMMENT" ? "댓글" : 
+                  report.postType === "CHAT" ? "채팅" : 
+                  report.postType === "PROFILE" ? "프로필" : report.postType,
+            신고자: report.reportingPersonNickname,
+            신고자닉네임: report.reportingPersonNickname,
+            접수일: new Date(report.reportedDate).toLocaleString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            }).replace(/\. /g, '.').replace(/\.$/, ''),
+            사유: reasonTexts,
+            작성자: report.reportedPersonNickname,
+            처리상태: report.status === "PENDING" ? "대기중" : 
+                      report.status === "REVIEWING" ? "검토중" : 
+                      report.status === "RESOLVED" ? "처리완료" : 
+                      report.status === "REJECTED" ? "거부됨" : report.status,
+            처리상태색상: report.status === "PENDING" ? "text-gray-600" : 
+                          report.status === "REVIEWING" ? "text-blue-600" : 
+                          report.status === "RESOLVED" ? "text-green-600" : 
+                          report.status === "REJECTED" ? "text-red-600" : "text-gray-600",
+            // 원본 데이터도 함께 저장
+            reportedPersonId: report.reportedPersonId,
+            postId: report.postId,
+            reportId: report.reportId,
+          };
+        });
+        
+        setPaginationData(reportData);
+
+        const totalPages = response.result.page?.totalPages || 1;
+        setTotalPages(totalPages);
+
+      }
+    } catch (error) {
+      console.error("신고 데이터 조회 실패:", error);
+      setPaginationData([]);
+      setTotalPages(1);
+    }
   }
 
   useEffect(() => {
     getReportData();
-  }, [currentPage]);
-
-  // 더미 데이터
-  const data = [
-    { 타입: "공고문", 신고자: "김서현", 신고자닉네임: "김서현닉네임", 접수일: "2025-08-01", 사유: "욕설", 작성자: "이민호", 작성자닉네임: "이민호닉네임"},
-    { 타입: "프로필", 신고자: "박지훈", 신고자닉네임: "박지훈닉네임", 접수일: "2025-08-02", 사유: "스팸", 작성자: "정지수", 작성자닉네임: "정지수닉네임"},
-    { 타입: "댓글", 신고자: "최민지", 신고자닉네임: "최민지닉네임", 접수일: "2025-08-03", 사유: "허위정보", 작성자: "한수민", 작성자닉네임: "한수민닉네임"},
-    { 타입: "피드", 신고자: "이도현", 신고자닉네임: "이도현닉네임", 접수일: "2025-08-04", 사유: "불법 광고", 작성자: "오유진", 작성자닉네임: "오유진닉네임"},
-    { 타입: "프로필", 신고자: "정예린", 신고자닉네임: "정예린닉네임", 접수일: "2025-08-05", 사유: "혐오 발언", 작성자: "김민재", 작성자닉네임: "김민재닉네임"},
-    { 타입: "프로필", 신고자: "오세훈", 신고자닉네임: "오세훈닉네임", 접수일: "2025-08-06", 사유: "도배", 작성자: "홍길동", 작성자닉네임: "홍길동닉네임"},
-    { 타입: "프로필", 신고자: "한수진", 신고자닉네임: "한수진닉네임", 접수일: "2025-08-07", 사유: "음란물", 작성자: "박지민", 작성자닉네임: "박지민닉네임"},
-    { 타입: "댓글", 신고자: "조민호", 신고자닉네임: "조민호닉네임", 접수일: "2025-08-08", 사유: "허위 사실", 작성자: "최예린", 작성자닉네임: "최예린닉네임"},
-    { 타입: "피드", 신고자: "양지우", 신고자닉네임: "양지우닉네임", 접수일: "2025-08-09", 사유: "욕설", 작성자: "강민수", 작성자닉네임: "강민수닉네임"},
-    { 타입: "피드", 신고자: "서가영", 신고자닉네임: "서가영닉네임", 접수일: "2025-08-10", 사유: "스팸", 작성자: "이도훈", 작성자닉네임: "이도훈닉네임"},
-    { 타입: "공고문", 신고자: "홍승우", 신고자닉네임: "홍승우닉네임", 접수일: "2025-08-11", 사유: "불법 광고", 작성자: "정민호", 작성자닉네임: "정민호닉네임"},
-    { 타입: "공고문", 신고자: "배유진", 신고자닉네임: "배유진닉네임", 접수일: "2025-08-12", 사유: "욕설", 작성자: "김하늘", 작성자닉네임: "김하늘닉네임"},
-    { 타입: "공고문", 신고자: "임하늘", 신고자닉네임: "임하늘닉네임", 접수일: "2025-08-13", 사유: "도배", 작성자: "박준영", 작성자닉네임: "박준영닉네임"},
-    { 타입: "피드", 신고자: "강서현", 신고자닉네임: "강서현닉네임", 접수일: "2025-08-14", 사유: "음란물", 작성자: "최수정", 작성자닉네임: "최수정닉네임"},
-    { 타입: "공고문", 신고자: "문지호", 신고자닉네임: "문지호닉네임", 접수일: "2025-08-15", 사유: "혐오 발언", 작성자: "조현우", 작성자닉네임: "조현우닉네임"},
-    { 타입: "댓글", 신고자: "윤채린", 신고자닉네임: "윤채린닉네임", 접수일: "2025-08-16", 사유: "스팸", 작성자: "김지후", 작성자닉네임: "김지후닉네임"},
-    { 타입: "댓글", 신고자: "이승우", 신고자닉네임: "이승우닉네임", 접수일: "2025-08-17", 사유: "허위정보", 작성자: "박서연", 작성자닉네임: "박서연닉네임"},
-    { 타입: "댓글", 신고자: "정다은", 신고자닉네임: "정다은닉네임", 접수일: "2025-08-18", 사유: "욕설", 작성자: "한지민", 작성자닉네임: "한지민닉네임"},
-    { 타입: "댓글", 신고자: "고현서", 신고자닉네임: "고현서닉네임", 접수일: "2025-08-19", 사유: "불법 광고", 작성자: "오민석", 작성자닉네임: "오민석닉네임"},
-    { 타입: "피드", 신고자: "차유나", 신고자닉네임: "차유나닉네임", 접수일: "2025-08-20", 사유: "음란물", 작성자: "홍지훈", 작성자닉네임: "홍지훈닉네임"},
-  ];
+  }, [currentPage, typeFilter]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -62,24 +120,62 @@ export default function Reports() {
 
   const handleFilterChange = (value) => {
     setTypeFilter(value);
+    setCurrentPage(0);
   };
 
-  const handleFilterCountChange = (value) => {
-    setTypeFilterCount(value);
-  };
+
 
   const handleFilterDateChange = (value) => {
     setTypeFilterDate(value);
+    setCurrentPage(0);
   };
 
   const handleSearchChange = (value) => {
     console.log("검색어:", value);
   };
 
-  useEffect(() => {
-    setPaginationData(data.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-    setTotalPages(Math.ceil(data.length / pageSize));
-  }, [currentPage]);
+  const handleRowClick = (report, originalData) => {
+    setSelectedReport({ ...report, originalData });
+    setShowDetailBox(true);
+  };
+
+  const handleCloseDetailBox = () => {
+    setShowDetailBox(false);
+    setSelectedReport(null);
+    setSelectedStatus(null);
+  };
+
+  const handleStatusChange = (newStatus) => {
+    setSelectedStatus(newStatus);
+  };
+
+  const handleProcessComplete = async () => {
+    if (!selectedStatus || !selectedReport) {
+      alert('처리 상태를 선택해주세요.');
+      return;
+    }
+
+    try {
+      const reportId = Number(selectedReport.reportId);
+      if (isNaN(reportId)) {
+        alert('유효하지 않은 신고 ID입니다.');
+        return;
+      }
+
+      const response = await patchReport({
+        reportId: reportId,
+        reportStatus: selectedStatus,
+      });
+
+      alert('신고 처리가 완료되었습니다.');
+      
+      handleCloseDetailBox();
+      getReportData();
+    } catch (error) {
+      console.error('신고 처리 실패:', error);
+      alert('신고 처리에 실패했습니다.');
+    }
+  };
 
   return (
     <AdminLayout
@@ -89,23 +185,14 @@ export default function Reports() {
           label: "타입",
           value: typeFilter,
           options: [
-            { label: "공고문", value: "recruit" },
-            { label: "피드", value: "feed" },
-            { label: "댓글", value: "comment" },
-            { label: "프로필", value: "profile" },
+            { label: "전체", value: "ALL" },
+            { label: "공고문", value: "RECRUIT" },
+            { label: "피드", value: "FEED" },
+            { label: "댓글", value: "COMMENT" },
+            { label: "프로필", value: "PROFILE" },
+            { label: "채팅", value: "CHAT" },
           ],
           onFilterChange: handleFilterChange,
-        },
-        {
-          label: "누적 신고 횟수",
-          value: typeFilterCount,
-          options: [
-            { label: "5회 미만", value: "5" },
-            { label: "10회 미만", value: "10" },
-            { label: "20회 미만", value: "20" },
-            { label: "20회 이상", value: "21" },
-          ],
-          onFilterChange: handleFilterCountChange,
         },
         {
           label: "작성일",
@@ -121,13 +208,111 @@ export default function Reports() {
       searchPlaceholder="접수일 또는 닉네임을 검색하세요"
       onSearchChange={handleSearchChange}
     >
-      <div className="bg-white min-h-[550px] flex flex-col justify-between mx-4">
-        <Table columns={columns} data={paginationData} />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+      <div className="mx-4">
+        <div className="flex gap-6">
+          {/* 테이블 영역 */}
+          <div className="flex-1 bg-white min-h-[550px] flex flex-col justify-between">
+            <Table 
+              columns={columns} 
+              data={paginationData} 
+              onRowClick={handleRowClick}
+              originalData={paginationData}
+            />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+          
+          {/* 신고 처리 상세 박스 */}
+          {showDetailBox && selectedReport && (
+            <div className="w-96 bg-white h-fit">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">신고 처리</h2>
+                  <button
+                    onClick={handleCloseDetailBox}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 ">이동하기</label>
+                    <a 
+                      href={`https://www.souf.co.kr/profileDetail/${selectedReport.reportedPersonId}/post/${selectedReport.postId}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-blue-500 underline underline-offset-4"
+                    >
+                      피드 바로가기 
+                    </a>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">현재 상태</label>
+                    <div className="p-3 bg-gray-50 rounded border">{selectedReport.처리상태}</div>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">처리 상태 변경</label>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-blue-300 ${
+                          selectedStatus === 'REVIEWING' 
+                            ? 'bg-blue-400 text-white font-bold' 
+                            : 'bg-white text-blue-500 border-blue-500 hover:bg-blue-300 hover:text-white hover:font-bold'
+                        }`}
+                        onClick={() => handleStatusChange('REVIEWING')}
+                      >
+                        검토중
+                      </button>
+                      <button 
+                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-green-300 ${
+                          selectedStatus === 'RESOLVED' 
+                            ? 'bg-green-400 text-white font-bold' 
+                            : 'bg-white text-green-500 border-green-500 hover:bg-green-300 hover:text-white hover:font-bold'
+                        }`}
+                        onClick={() => handleStatusChange('RESOLVED')}
+                      >
+                        처리완료
+                      </button>
+                      <button 
+                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-red-300 ${
+                          selectedStatus === 'REJECTED' 
+                            ? 'bg-red-400 text-white font-bold' 
+                            : 'bg-white text-red-500 border-red-500 hover:bg-red-300 hover:text-white hover:font-bold'
+                        }`}
+                        onClick={() => handleStatusChange('REJECTED')}
+                      >
+                        거부됨
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-4">
+                    <button 
+                      className="flex-1 bg-yellow-main text-black font-semibold py-3 px-4 rounded hover:bg-yellow-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleProcessComplete}
+                      disabled={!selectedStatus}
+                    >
+                      처리 완료
+                    </button>
+                    <button 
+                      onClick={handleCloseDetailBox}
+                      className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </AdminLayout>
   );
