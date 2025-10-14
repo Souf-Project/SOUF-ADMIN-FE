@@ -66,7 +66,7 @@ export default function MainRecruit() {
 
 
   return (
-    <div className="flex flex-col items-start gap-12">
+    <div className="flex flex-col items-start gap-12 text-black">
         <section className="flex flex-col ">
             <h2 className="text-lg md:text-2xl font-semibold mb-2">메인 공모전 - 큰 사이즈</h2>
             <div className="flex flex-row gap-4">

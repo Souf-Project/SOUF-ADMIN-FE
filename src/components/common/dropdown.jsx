@@ -16,7 +16,7 @@ export default function Dropdown({
     options.find((opt) => opt.value === value)?.label || "필터 선택";
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block text-black">
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center border rounded bg-white px-6 py-2 cursor-pointer min-w-48 justify-between"

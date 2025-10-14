@@ -87,7 +87,7 @@ export default function Input({
       <input
         type={type}
         className={`w-full py-2 px-2 font-medium bg-[#F6F6F6] text-black placeholder-[#81818a] text-md md:text-lg border-0 border-b-[3px] outline-none transition-colors duration-200 ${borderColor} ${
-          isError ? "" : "focus:border-yellow-point"
+          isError ? "" : "focus:border-blue-point"
         }`}
         placeholder={placeholder}
         value={inputValue}

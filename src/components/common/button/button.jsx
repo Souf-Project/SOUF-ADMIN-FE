@@ -17,7 +17,7 @@ export default function Button({
 <button
     type={type}
   onClick={onClick}
-  className={`btn-hover h-[52px] px-6 whitespace-nowrap rounded-[10px] text-black text-xl font-semibold bg-yellow-main flex items-center justify-center ${width}`}>
+  className={`btn-hover h-[52px] px-6 whitespace-nowrap rounded-[10px] text-white text-xl font-semibold bg-blue-main flex items-center justify-center ${width}`}>
   {btnText}
 </button>
 
