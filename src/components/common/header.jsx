@@ -13,6 +13,7 @@ export default function Header() {
     { label: "게시글 관리", href: "/posts" },
     { label: "광고 문의&교체", href: "/advertisements" },
     { label: "신고", href: "/reports" },
+    { label: "문의", href: "/inquiry" },
   ];
 
   return (

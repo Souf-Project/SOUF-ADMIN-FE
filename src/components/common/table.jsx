@@ -14,7 +14,7 @@ export default function Table({ columns, data, renderAction, onRowClick, origina
             <tr 
               key={idx} 
               className={`bg-white ${onRowClick ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}`}
-              onClick={() => onRowClick && onRowClick(row, originalData[idx])}
+              onClick={() => onRowClick && onRowClick(row, originalData && originalData[idx])}
             >
               {columns.map((col) => (
                 <td key={col.key} className="border p-2">
