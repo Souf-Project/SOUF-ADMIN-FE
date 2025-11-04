@@ -5,9 +5,10 @@ export default {
     extend: {
       colors: {
         primary: "#000000",
-        yellow: {
-          main: "#FFE58F",
-          point: "#FFC400",
+        blue: {
+          main: "#5CA1E8",
+          bright: "#F5F9FF",
+          point: "#2969E0",
         },
         red: {
           essential: "#E43F2D",

@@ -1,8 +1,8 @@
 export default function Table({ columns, data, renderAction, onRowClick, originalData }) {
   return (
     <div className="overflow-x-auto w-full">
-      <table className="w-full border-collapse border border-gray-500">
-        <thead className="bg-[#FDF6D3] border">
+      <table className="w-full border-collapse border border-gray-500 text-black">
+        <thead className="bg-blue-200 border">
           <tr>
             {columns.map((col) => (
               <th key={col.key} className="border p-2 text-left">{col.value}</th>
@@ -14,7 +14,7 @@ export default function Table({ columns, data, renderAction, onRowClick, origina
             <tr 
               key={idx} 
               className={`bg-white ${onRowClick ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}`}
-              onClick={() => onRowClick && onRowClick(row, originalData[idx])}
+              onClick={() => onRowClick && onRowClick(row, originalData && originalData[idx])}
             >
               {columns.map((col) => (
                 <td key={col.key} className="border p-2">

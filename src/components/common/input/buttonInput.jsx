@@ -43,10 +43,10 @@ export default function ButtonInput({
                     <button
                         onClick={onClick}
                         disabled={isLoading}
-                        className={`h-[45px] md:h-[50px] px-6 whitespace-nowrap rounded-[10px] text-black text-lg md:text-xl font-semibold ${
+                        className={`h-[45px] md:h-[50px] px-6 whitespace-nowrap rounded-[10px] text-white text-lg md:text-xl font-semibold ${
                             isLoading 
                                 ? 'bg-gray-300 cursor-not-allowed' 
-                                : 'bg-yellow-main hover:bg-yellow-point transition-colors duration-200'
+                                : 'bg-blue-main hover:bg-blue-point transition-colors duration-200'
                         }`}
                     >
                         {isLoading ? '전송 중...' : btnText}

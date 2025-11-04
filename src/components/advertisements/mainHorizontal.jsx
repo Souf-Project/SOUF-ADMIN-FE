@@ -26,7 +26,7 @@ export default function MainHorizontal() {
 
 
   return (
-    <div className="flex flex-col items-start gap-4">
+    <div className="flex flex-col items-start gap-4 text-black">
         {mockData.map((data) => (
             <MainHorizontalBlock
             key={data.title}

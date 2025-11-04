@@ -295,7 +295,7 @@ export default function Reports() {
                   
                   <div className="flex gap-3 pt-4">
                     <button 
-                      className="flex-1 bg-yellow-main text-black font-semibold py-3 px-4 rounded hover:bg-yellow-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-blue-main text-white font-semibold py-3 px-4 rounded hover:bg-blue-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleProcessComplete}
                       disabled={!selectedStatus}
                     >

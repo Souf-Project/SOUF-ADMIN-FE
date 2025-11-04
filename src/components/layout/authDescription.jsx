@@ -1,5 +1,6 @@
 import { useMediaQuery } from 'react-responsive';
 import SoufLogo from '../../assets/images/SouFLogo.svg';
+import basicLogoImg from "../../assets/images/basicLogoImg.png"
 
 export default function AuthDescription() {
   const isMobile = useMediaQuery({ maxWidth: 1024 }); // lg 기준
@@ -21,10 +22,10 @@ export default function AuthDescription() {
 
   // PC 버전
   return (
-    <div className="hidden lg:flex lg:w-1/2 h-full my-auto bg-[#FFE681] flex-col px-16 justify-center items-center">
-      <p className="text-center text-5xl font-bold leading-relaxed text-gray-800 mb-10">
+    <div className="hidden lg:flex lg:w-1/2 h-full my-auto bg-[#3E78E3] flex-col px-16 justify-center items-center">
+      <p className="text-center text-5xl text-white font-bold leading-relaxed text-gray-800 mb-10">
         관리자 페이지
-        <img src={SoufLogo} alt="SouF Logo" className="mx-auto mt-4" />
+        <img src={basicLogoImg} alt="SouF Logo" className="mx-auto mt-4 w-48" />
         <span className="text-3xl">SouF | 대학생 외주 & 공모전</span>
       </p>
     </div>

@@ -7,6 +7,7 @@ import Advertisements from "../pages/advertisement/advertisements";
 import Reports from "../pages/reports";
 import Header from "../components/common/header";
 import AddMainHorizontal from "../pages/advertisement/addMainHorizontal";
+import Inquiry from "../pages/inquiry";
 
 function AppRouter() {
   const location = useLocation();
@@ -24,6 +25,7 @@ function AppRouter() {
                 <Route path="/posts" element={<Posts />} />
                 <Route path="/advertisements" element={<Advertisements />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/inquiry" element={<Inquiry />} />
                 <Route path="/add/mainHorizontal" element={<AddMainHorizontal/>} />
             </Routes>
         </main>
