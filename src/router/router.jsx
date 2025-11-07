@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Login from "../pages/login";
 import PwdFind from "../pages/pwdFind";
 import Members from "../pages/members";
@@ -8,6 +8,19 @@ import Reports from "../pages/reports";
 import Header from "../components/common/header";
 import AddMainHorizontal from "../pages/advertisement/addMainHorizontal";
 import Inquiry from "../pages/inquiry";
+import { useUserStore } from "../store/userStore";
+
+function ProtectedRoute({ children }) {
+  const { memberId } = useUserStore();
+  const isLoggedIn = memberId !== null && memberId !== undefined;
+
+  if (!isLoggedIn) {
+    alert('로그인 후 이용가능합니다!');
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
 
 function AppRouter() {
   const location = useLocation();
@@ -21,12 +34,12 @@ function AppRouter() {
             <Routes>
                 <Route path="/" element={<Login/>}/>
                 <Route path="/pwdFind" element={<PwdFind/>}/>
-                <Route path="/members" element={<Members />} />
-                <Route path="/posts" element={<Posts />} />
-                <Route path="/advertisements" element={<Advertisements />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/inquiry" element={<Inquiry />} />
-                <Route path="/add/mainHorizontal" element={<AddMainHorizontal/>} />
+                <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+                <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+                <Route path="/advertisements" element={<ProtectedRoute><Advertisements /></ProtectedRoute>} />
+                <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                <Route path="/inquiry" element={<ProtectedRoute><Inquiry /></ProtectedRoute>} />
+                <Route path="/add/mainHorizontal" element={<ProtectedRoute><AddMainHorizontal/></ProtectedRoute>} />
             </Routes>
         </main>
     </div>
