@@ -26,6 +26,7 @@ jobs:
           echo "VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}" > .env
 
       - name: Build project
+        echo "VITE_BASE_URL=https://api.souf.co.kr" >> .env.production
         run: npm run build
 
       - name: Configure AWS credentials
