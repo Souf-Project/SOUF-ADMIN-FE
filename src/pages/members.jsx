@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMember, patchMemberStatus } from "../api/member";
+import { getMember, patchMemberStatus, getMemberAuthFile } from "../api/member";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
@@ -16,6 +16,8 @@ export default function Members() {
   const [showModal, setShowModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [authFile, setAuthFile] = useState(null);
+  const [loadingAuthFile, setLoadingAuthFile] = useState(false);
   const pageSize = 10;
   const columns = [
   { key: "타입", value: "타입" },
@@ -25,6 +27,8 @@ export default function Members() {
   { key: "관리", value: "관리" },
   { key: "처리상태", value: "처리 상태" },
 ];
+
+const VITE_S3_BUCKET_URL = import.meta.env.VITE_S3_BUCKET_URL;
 
 const getMemberData = async () => {
   try {
@@ -122,12 +126,37 @@ useEffect(() => {
     setCurrentPage(0);
   };
 
-  const handleRowClick = (member, originalData) => {
+  const handleRowClick = async (member, originalData) => {
     // originalData가 있으면 사용, 없으면 member 자체 사용
-    setSelectedMember(originalData || member);
+    const memberData = originalData || member;
+    setSelectedMember(member);
     setShowModal(true);
     setSelectedStatus(null);
     setRejectReason("");
+    setAuthFile(null);
+    
+    // 인증 파일 조회 - memberId는 mapped data나 originalData에서 가져올 수 있음
+    const memberId = member.memberId || (originalData && originalData.memberId);
+    if (memberId) {
+      setLoadingAuthFile(true);
+      try {
+        const response = await getMemberAuthFile({ memberId: memberId });
+        console.log("인증 파일 응답:", response);
+        // API 응답 구조에 따라 수정 필요
+        if (response && response.result) {
+          setAuthFile(response.result);
+        } else if (response && response.data) {
+          setAuthFile(response.data);
+        } else {
+          setAuthFile(response);
+        }
+      } catch (error) {
+        console.error("인증 파일 조회 실패:", error);
+        setAuthFile(null);
+      } finally {
+        setLoadingAuthFile(false);
+      }
+    }
   };
 
   const handleCloseModal = () => {
@@ -135,6 +164,7 @@ useEffect(() => {
     setSelectedMember(null);
     setSelectedStatus(null);
     setRejectReason("");
+    setAuthFile(null);
   };
 
   const handleStatusChange = (newStatus) => {
@@ -235,7 +265,7 @@ useEffect(() => {
       {showModal && selectedMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={handleCloseModal}>
           <div 
-            className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto"
+            className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -248,7 +278,9 @@ useEffect(() => {
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="flex gap-6">
+              {/* 왼쪽: 회원 정보 */}
+              <div className="flex-1 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">이름</label>
                 <div className="p-3 bg-gray-50 rounded border">{selectedMember.이름}</div>
@@ -345,6 +377,149 @@ useEffect(() => {
                   </button>
                 </div>
               )}
+              </div>
+              
+              {/* 오른쪽: 인증 파일 및 상세 정보 */}
+              <div className="flex-1 border-l pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">인증 정보</h3>
+                {loadingAuthFile ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-gray-500">로딩 중...</div>
+                  </div>
+                ) : authFile ? (
+                  <div className="space-y-6">
+                    {/* 인증 파일 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">인증 파일</label>
+                      {authFile.authenticationFileUrl ? (() => {
+                        const fileUrl = VITE_S3_BUCKET_URL + authFile.authenticationFileUrl;
+                        const fileExtension = authFile.authenticationFileUrl.split('.').pop()?.toLowerCase();
+                        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(fileExtension);
+                        const isPdf = fileExtension === 'pdf';
+                        
+                        return (
+                          <div className="space-y-2">
+                            {isImage ? (
+                              <img 
+                                src={fileUrl} 
+                                alt="인증 파일" 
+                                className="w-full rounded border max-h-[500px] object-contain"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'block';
+                                }}
+                              />
+                            ) : isPdf ? (
+                              <iframe
+                                src={fileUrl}
+                                className="w-full rounded border"
+                                style={{ height: '500px' }}
+                                title="인증 파일 PDF"
+                              />
+                            ) : (
+                              <div className="p-4 bg-gray-50 rounded border text-gray-500 text-center">
+                                미리보기를 지원하지 않는 파일 형식입니다.
+                              </div>
+                            )}
+                            <div style={{ display: 'none' }} className="text-gray-500 text-center py-4">
+                              파일을 불러올 수 없습니다.
+                            </div>
+                            <a 
+                              href={fileUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-main hover:text-blue-point underline text-sm"
+                            >
+                              원본 파일 보기
+                            </a>
+                          </div>
+                        );
+                      })() : (
+                        <div className="p-3 bg-gray-50 rounded border text-gray-500 text-sm">
+                          인증 파일이 없습니다.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 전화번호 */}
+                    {authFile.resDto?.phoneNumber && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                        <div className="p-3 bg-gray-50 rounded border">{authFile.resDto.phoneNumber}</div>
+                      </div>
+                    )}
+
+                    {/* 상세 정보 (detail이 있는 경우에만 표시) */}
+                    {authFile.resDto?.detail && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">사업자 정보</label>
+                        <div className="space-y-3 p-4 bg-gray-50 rounded border">
+                          {authFile.resDto.detail.companyName && (
+                            <div>
+                              <span className="text-xs text-gray-500">회사명</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.companyName}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.businessClassification && (
+                            <div>
+                              <span className="text-xs text-gray-500">사업자 분류</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.businessClassification}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.businessRegistrationNumber && (
+                            <div>
+                              <span className="text-xs text-gray-500">사업자 등록번호</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.businessRegistrationNumber}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.businessStatus && (
+                            <div>
+                              <span className="text-xs text-gray-500">업태</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.businessStatus}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.zipCode && (
+                            <div>
+                              <span className="text-xs text-gray-500">우편번호</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.zipCode}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.roadNameAddress && (
+                            <div>
+                              <span className="text-xs text-gray-500">도로명 주소</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.roadNameAddress}
+                              </div>
+                            </div>
+                          )}
+                          {authFile.resDto.detail.detailedAddress && (
+                            <div>
+                              <span className="text-xs text-gray-500">상세 주소</span>
+                              <div className="text-sm font-medium text-gray-800 mt-1">
+                                {authFile.resDto.detail.detailedAddress}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-gray-500 py-8 text-center">
+                    인증 정보를 불러올 수 없습니다.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

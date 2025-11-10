@@ -50,3 +50,12 @@ export const patchMemberStatus = async ({ memberId, approvedStatus, requestBody 
     }
 }
 
+export const getMemberAuthFile = async ({ memberId }) => {
+    try {
+        const response = await client.get(`/api/v1/admin/member/${memberId}`);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
