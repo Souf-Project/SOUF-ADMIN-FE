@@ -42,6 +42,9 @@ export default function Login() {
         localStorage.setItem("accessToken", response.result.accessToken);
         localStorage.setItem("memberId", response.result.memberId);
         localStorage.setItem("nickname", response.result.nickname);
+        if (response.result.roleType) {
+          localStorage.setItem("roleType", response.result.roleType);
+        }
         
         // 로그인 성공 후 메인 페이지로 이동
         navigate("/members");

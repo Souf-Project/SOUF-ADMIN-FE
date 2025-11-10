@@ -46,7 +46,7 @@ const getMemberData = async () => {
     const response = await getMember(params);
     // console.log("전체 API 응답:", response);
     // console.log("response.data:", response?.data);
-    // console.log("response.data.result:", response?.data?.result);
+    console.log("response.data.result:", response?.data?.result);
     if (response && response.data && response.data.result) {
       // console.log("API 응답 데이터:", response.data.result.content);
       // console.log("페이지 정보:", response.data.result.page);
@@ -80,8 +80,8 @@ const getMemberData = async () => {
                            response.data.result.content?.length || 
                            memberData.length;
       
-      console.log("계산된 totalElements:", totalElements);
-      console.log("계산된 totalPages:", Math.ceil(totalElements / pageSize));
+      // console.log("계산된 totalElements:", totalElements);
+      // console.log("계산된 totalPages:", Math.ceil(totalElements / pageSize));
       
       setTotalPages(Math.ceil(totalElements / pageSize));
     }
