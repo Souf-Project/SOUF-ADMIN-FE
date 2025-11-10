@@ -44,9 +44,14 @@ const getMemberData = async () => {
     }
     
     const response = await getMember(params);
-    // console.log(response);
+    // console.log("전체 API 응답:", response);
+    // console.log("response.data:", response?.data);
+    // console.log("response.data.result:", response?.data?.result);
     if (response && response.data && response.data.result) {
       // console.log("API 응답 데이터:", response.data.result.content);
+      // console.log("페이지 정보:", response.data.result.page);
+      // console.log("totalElements:", response.data.result.page?.totalElements || response.data.result.totalElements);
+      
       const memberData = response.data.result.content.map(member => {
         const processedMember = {
           타입: member.roleType === "STUDENT" ? "학생" : member.roleType === "ADMIN" ? "관리자" : member.roleType === "CLUB" ? "동아리" : "기업",
@@ -69,7 +74,15 @@ const getMemberData = async () => {
       // console.log("전체 memberData:", memberData);
       setPaginationData(memberData);
 
-      const totalElements = response.data.result.totalElements || memberData.length;
+      // API 응답에서 totalElements 가져오기
+      const totalElements = response.data.result.page?.totalElements || 
+                           response.data.result.totalElements || 
+                           response.data.result.content?.length || 
+                           memberData.length;
+      
+      console.log("계산된 totalElements:", totalElements);
+      console.log("계산된 totalPages:", Math.ceil(totalElements / pageSize));
+      
       setTotalPages(Math.ceil(totalElements / pageSize));
     }
   } catch (error) {
@@ -261,62 +274,77 @@ useEffect(() => {
                 <div className="p-3 bg-gray-50 rounded border">{selectedMember.처리상태}</div>
               </div>
               
-              <div className="pt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">처리 상태 변경</label>
-                <div className="flex flex-col gap-2">
-                 
+              {selectedMember.처리상태 !== "승인" && (
+                <>
+                  <div className="pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">처리 상태 변경</label>
+                    <div className="flex flex-col gap-2">
+                     
+                      <button 
+                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-green-300 ${
+                          selectedStatus === 'APPROVED' 
+                            ? 'bg-green-400 text-white font-bold border-none' 
+                            : 'bg-white text-green-500 border-green-500 hover:bg-green-300 hover:text-white hover:font-bold'
+                        }`}
+                        onClick={() => handleStatusChange('APPROVED')}
+                      >
+                        승인
+                      </button>
+                      <button 
+                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-red-300 ${
+                          selectedStatus === 'REJECTED' 
+                            ? 'bg-red-400 text-white font-bold border-none' 
+                            : 'bg-white text-red-500 border-red-500 hover:bg-red-300 hover:text-white hover:font-bold'
+                        }`}
+                        onClick={() => handleStatusChange('REJECTED')}
+                      >
+                        거절
+                      </button>
+                    </div>
+                    
+                    {/* 거절 선택 시 사유 입력 필드 */}
+                    {selectedStatus === 'REJECTED' && (
+                      <div className="pt-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">거절 사유</label>
+                        <textarea
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          placeholder="거절 사유를 입력하세요"
+                          rows={4}
+                          className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-red-300 focus:border-transparent resize-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-3 pt-4">
+                    <button 
+                      className="flex-1 bg-blue-main text-white font-semibold py-3 px-4 rounded hover:bg-blue-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleProcessComplete}
+                      disabled={!selectedStatus || (selectedStatus === 'REJECTED' && !rejectReason.trim())}
+                    >
+                      처리 완료
+                    </button>
+                    <button 
+                      onClick={handleCloseModal}
+                      className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </>
+              )}
+              
+              {selectedMember.처리상태 === "승인" && (
+                <div className="flex gap-3 pt-4">
                   <button 
-                    className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-green-300 ${
-                      selectedStatus === 'APPROVED' 
-                        ? 'bg-green-400 text-white font-bold border-none' 
-                        : 'bg-white text-green-500 border-green-500 hover:bg-green-300 hover:text-white hover:font-bold'
-                    }`}
-                    onClick={() => handleStatusChange('APPROVED')}
+                    onClick={handleCloseModal}
+                    className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
                   >
-                    승인
-                  </button>
-                  <button 
-                    className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-red-300 ${
-                      selectedStatus === 'REJECTED' 
-                        ? 'bg-red-400 text-white font-bold border-none' 
-                        : 'bg-white text-red-500 border-red-500 hover:bg-red-300 hover:text-white hover:font-bold'
-                    }`}
-                    onClick={() => handleStatusChange('REJECTED')}
-                  >
-                    거절
+                    닫기
                   </button>
                 </div>
-                
-                {/* 거절 선택 시 사유 입력 필드 */}
-                {selectedStatus === 'REJECTED' && (
-                  <div className="pt-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">거절 사유</label>
-                    <textarea
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      placeholder="거절 사유를 입력하세요"
-                      rows={4}
-                      className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-red-300 focus:border-transparent resize-none"
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex gap-3 pt-4">
-                <button 
-                  className="flex-1 bg-blue-main text-white font-semibold py-3 px-4 rounded hover:bg-blue-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleProcessComplete}
-                  disabled={!selectedStatus || (selectedStatus === 'REJECTED' && !rejectReason.trim())}
-                >
-                  처리 완료
-                </button>
-                <button 
-                  onClick={handleCloseModal}
-                  className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
-                >
-                  취소
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
