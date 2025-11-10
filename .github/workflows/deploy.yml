@@ -24,7 +24,7 @@ jobs:
       - name: Create .env
         run: |
           echo "VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}" > .env
-          echo "VITE_BASE_URL=https://api.souf.co.kr" > .env.production
+          echo "VITE_BASE_URL=https://api-souf.co.kr" > .env.production
 
       - name: Build project
         run: npm run build
