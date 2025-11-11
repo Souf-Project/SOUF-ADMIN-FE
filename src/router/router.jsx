@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Login from "../pages/login";
-import PwdFind from "../pages/pwdFind";
 import Members from "../pages/members";
 import Posts from "../pages/posts";
 import Advertisements from "../pages/advertisement/advertisements";
@@ -33,7 +32,6 @@ function AppRouter() {
         <main>
             <Routes>
                 <Route path="/" element={<Login/>}/>
-                <Route path="/pwdFind" element={<PwdFind/>}/>
                 <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
                 <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
                 <Route path="/advertisements" element={<ProtectedRoute><Advertisements /></ProtectedRoute>} />

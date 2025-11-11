@@ -88,15 +88,7 @@ export default function Login() {
             아이디 또는 비밀번호가 일치하지 않습니다.
           </div>
         )}
-        <div className="flex justify-end text-[#767676] text-md sm:text-xl">
-          <button
-            type="button"
-            className="bg-white underline underline-offset-4 decoration-gray-300 p-0"
-            onClick={() => navigate("/pwdFind")}
-          >
-            비밀번호 재설정
-          </button>
-        </div>
+        
         <div className="flex justify-center">
           <Button 
             btnText="로그인" 
