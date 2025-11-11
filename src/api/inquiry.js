@@ -27,3 +27,17 @@ export const getInquiry = async ({ page, size, inquiryType, inquiryStatus }) => 
         throw error;
     }
 }
+
+export const patchInquiryStatus = async ({ inquiryId, answer, status }) => {
+    try {
+        const response = await client.patch(`/api/v1/admin/inquiry/${inquiryId}`, {
+            answer: answer,
+            status: status,
+        });
+        return response;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
