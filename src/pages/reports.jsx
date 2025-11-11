@@ -95,10 +95,25 @@ export default function Reports() {
             postId: report.postId,
             reportId: report.reportId,
             originalData: report, // 원본 데이터 전체 저장
+            reportedDate: report.reportedDate, // 정렬을 위한 원본 날짜 저장
           };
         });
         
-        setPaginationData(reportData);
+        // 접수일 기준 정렬
+        const sortedData = [...reportData].sort((a, b) => {
+          const dateA = new Date(a.reportedDate || a.originalData?.reportedDate);
+          const dateB = new Date(b.reportedDate || b.originalData?.reportedDate);
+          
+          if (typeFilterDate === "newest") {
+            // 최신순: 내림차순 (최신이 먼저)
+            return dateB - dateA;
+          } else {
+            // 오래된 순: 오름차순 (오래된 것이 먼저)
+            return dateA - dateB;
+          }
+        });
+        
+        setPaginationData(sortedData);
 
         const totalPages = response.result.page?.totalPages || 1;
         setTotalPages(totalPages);
@@ -113,7 +128,7 @@ export default function Reports() {
 
   useEffect(() => {
     getReportData();
-  }, [currentPage, typeFilter]);
+  }, [currentPage, typeFilter, typeFilterDate]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -169,6 +184,8 @@ export default function Reports() {
         reportId: reportId,
         reportStatus: selectedStatus,
       });
+
+      console.log("신고 처리 응답:", response);
 
       alert('신고 처리가 완료되었습니다.');
       
