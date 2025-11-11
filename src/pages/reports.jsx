@@ -11,14 +11,13 @@ export default function Reports() {
   const [totalPages, setTotalPages] = useState(1);
   const [paginationData, setPaginationData] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [showDetailBox, setShowDetailBox] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const pageSize = 10;
 
   const columns = [
     { key: "타입", value: "타입" },
     { key: "신고자", value: "신고자" },
-    { key: "신고자닉네임", value: "신고자닉네임" },
     { key: "접수일", value: "접수일" },
     { key: "사유", value: "사유" },
     { key: "작성자", value: "작성자" },
@@ -59,10 +58,12 @@ export default function Reports() {
 
       if (response && response.result && response.result.content) {
         const reportData = response.result.content.map(report => {
-          const reasonTexts = report.reasons.map(reasonId => {
-            const reason = reasons.find(r => r.value === reasonId);
-            return reason ? reason.label : `사유 ${reasonId}`;
-          }).join(', ');
+          const reasonTexts = report.reasons && report.reasons.length > 0
+            ? report.reasons.map(reasonId => {
+                const reason = reasons.find(r => r.value === reasonId);
+                return reason ? reason.label : `사유 ${reasonId}`;
+              }).join(', ')
+            : "사유 없음";
           
           return {
             타입: report.postType === "FEED" ? "피드" : 
@@ -71,7 +72,6 @@ export default function Reports() {
                   report.postType === "CHAT" ? "채팅" : 
                   report.postType === "PROFILE" ? "프로필" : report.postType,
             신고자: report.reportingPersonNickname,
-            신고자닉네임: report.reportingPersonNickname,
             접수일: new Date(report.reportedDate).toLocaleString('ko-KR', {
               year: 'numeric',
               month: '2-digit',
@@ -94,6 +94,7 @@ export default function Reports() {
             reportedPersonId: report.reportedPersonId,
             postId: report.postId,
             reportId: report.reportId,
+            originalData: report, // 원본 데이터 전체 저장
           };
         });
         
@@ -135,12 +136,14 @@ export default function Reports() {
   };
 
   const handleRowClick = (report, originalData) => {
-    setSelectedReport({ ...report, originalData });
-    setShowDetailBox(true);
+    const reportData = originalData || report;
+    setSelectedReport({ ...report, originalData: reportData });
+    setShowModal(true);
+    setSelectedStatus(null);
   };
 
-  const handleCloseDetailBox = () => {
-    setShowDetailBox(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
     setSelectedReport(null);
     setSelectedStatus(null);
   };
@@ -169,7 +172,7 @@ export default function Reports() {
 
       alert('신고 처리가 완료되었습니다.');
       
-      handleCloseDetailBox();
+      handleCloseModal();
       getReportData();
     } catch (error) {
       console.error('신고 처리 실패:', error);
@@ -208,112 +211,178 @@ export default function Reports() {
       searchPlaceholder="접수일 또는 닉네임을 검색하세요"
       onSearchChange={handleSearchChange}
     >
-      <div className="mx-4">
-        <div className="flex gap-6">
-          {/* 테이블 영역 */}
-          <div className="flex-1 bg-white min-h-[550px] flex flex-col justify-between">
-            <Table 
-              columns={columns} 
-              data={paginationData} 
-              onRowClick={handleRowClick}
-              originalData={paginationData}
-            />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-          
-          {/* 신고 처리 상세 박스 */}
-          {showDetailBox && selectedReport && (
-            <div className="w-96 bg-white h-fit">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">신고 처리</h2>
-                  <button
-                    onClick={handleCloseDetailBox}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
+      <div className="bg-white min-h-[550px] flex flex-col justify-between mx-4">
+        <Table 
+          columns={columns} 
+          data={paginationData} 
+          onRowClick={handleRowClick}
+          originalData={paginationData.map(item => item.originalData)}
+        />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
+      {/* 신고 처리 모달 */}
+      {showModal && selectedReport && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={handleCloseModal}>
+          <div 
+            className="bg-white rounded-lg shadow-xl w-full max-w-5xl p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">신고 처리</h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="flex gap-6">
+              {/* 왼쪽: 신고 정보 */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">신고 타입</label>
+                  <div className="p-3 bg-gray-50 rounded border">{selectedReport.타입}</div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">제목</label>
+                  <div className="p-3 bg-gray-50 rounded border">
+                    {selectedReport.originalData?.postTitle || "제목 없음"}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">신고 내용</label>
+                  <div className="p-3 bg-gray-50 rounded border min-h-[100px] whitespace-pre-wrap">
+                    {selectedReport.originalData?.description || "내용 없음"}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">사유</label>
+                  <div className="p-3 bg-gray-50 rounded border">
+                    {selectedReport.사유 || "사유 없음"}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">신고자</label>
+                  <div className="p-3 bg-gray-50 rounded border">{selectedReport.신고자}</div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">작성자</label>
+                  <div className="p-3 bg-gray-50 rounded border">{selectedReport.작성자}</div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">접수일</label>
+                  <div className="p-3 bg-gray-50 rounded border">{selectedReport.접수일}</div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">현재 상태</label>
+                  <div className="p-3 bg-gray-50 rounded border">{selectedReport.처리상태}</div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">이동하기</label>
+                  {(() => {
+                    const postType = selectedReport.originalData?.postType;
+                    let linkUrl = "";
+                    let linkText = "";
+                    
+                    if (postType === "FEED") {
+                      linkUrl = `https://www.souf.co.kr/profileDetail/${selectedReport.reportedPersonId}/post/${selectedReport.postId}`;
+                      linkText = "피드 바로가기";
+                    } else if (postType === "RECRUIT") {
+                      linkUrl = `https://www.souf.co.kr/recruitDetails/${selectedReport.postId}`;
+                      linkText = "공고문 바로가기";
+                    } else if (postType === "PROFILE") {
+                      linkUrl = `https://www.souf.co.kr/profileDetail/${selectedReport.reportedPersonId}`;
+                      linkText = "프로필 바로가기";
+                    } else {
+                      // COMMENT, CHAT 등 기타 타입
+                      linkUrl = `https://www.souf.co.kr/profileDetail/${selectedReport.reportedPersonId}/post/${selectedReport.postId}`;
+                      linkText = "바로가기";
+                    }
+                    
+                    return (
+                      <a 
+                        href={linkUrl}
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-500 underline underline-offset-4"
+                      >
+                        {linkText}
+                      </a>
+                    );
+                  })()}
+                </div>
+              </div>
+              
+              {/* 오른쪽: 처리 상태 변경 */}
+              <div className="flex-1 border-l pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">처리 상태 변경</h3>
+                <div className="flex flex-col gap-2">
+                  <button 
+                    className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-gray-300 ${
+                      selectedStatus === 'REVIEWING' 
+                        ? 'bg-gray-400 text-white font-bold border-none' 
+                        : 'bg-white text-gray-500 border-gray-500 hover:bg-gray-300 hover:text-white hover:font-bold'
+                    }`}
+                    onClick={() => handleStatusChange('REVIEWING')}
                   >
-                    ×
+                    검토중
+                  </button>
+                  <button 
+                    className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-green-300 ${
+                      selectedStatus === 'RESOLVED' 
+                        ? 'bg-green-400 text-white font-bold border-none' 
+                        : 'bg-white text-green-500 border-green-500 hover:bg-green-300 hover:text-white hover:font-bold'
+                    }`}
+                    onClick={() => handleStatusChange('RESOLVED')}
+                  >
+                    처리완료
+                  </button>
+                  <button 
+                    className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-red-300 ${
+                      selectedStatus === 'REJECTED' 
+                        ? 'bg-red-400 text-white font-bold border-none' 
+                        : 'bg-white text-red-500 border-red-500 hover:bg-red-300 hover:text-white hover:font-bold'
+                    }`}
+                    onClick={() => handleStatusChange('REJECTED')}
+                  >
+                    거부됨
                   </button>
                 </div>
                 
-                <div className="space-y-4">
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 ">이동하기</label>
-                    <a 
-                      href={`https://www.souf.co.kr/profileDetail/${selectedReport.reportedPersonId}/post/${selectedReport.postId}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-500 underline underline-offset-4"
-                    >
-                      피드 바로가기 
-                    </a>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">현재 상태</label>
-                    <div className="p-3 bg-gray-50 rounded border">{selectedReport.처리상태}</div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">처리 상태 변경</label>
-                    <div className="flex flex-col gap-2">
-                      <button 
-                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-blue-300 ${
-                          selectedStatus === 'REVIEWING' 
-                            ? 'bg-blue-400 text-white font-bold' 
-                            : 'bg-white text-blue-500 border-blue-500 hover:bg-blue-300 hover:text-white hover:font-bold'
-                        }`}
-                        onClick={() => handleStatusChange('REVIEWING')}
-                      >
-                        검토중
-                      </button>
-                      <button 
-                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-green-300 ${
-                          selectedStatus === 'RESOLVED' 
-                            ? 'bg-green-400 text-white font-bold' 
-                            : 'bg-white text-green-500 border-green-500 hover:bg-green-300 hover:text-white hover:font-bold'
-                        }`}
-                        onClick={() => handleStatusChange('RESOLVED')}
-                      >
-                        처리완료
-                      </button>
-                      <button 
-                        className={`w-full p-3 rounded font-medium transition-colors border focus:ring-2 focus:ring-red-300 ${
-                          selectedStatus === 'REJECTED' 
-                            ? 'bg-red-400 text-white font-bold' 
-                            : 'bg-white text-red-500 border-red-500 hover:bg-red-300 hover:text-white hover:font-bold'
-                        }`}
-                        onClick={() => handleStatusChange('REJECTED')}
-                      >
-                        거부됨
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3 pt-4">
-                    <button 
-                      className="flex-1 bg-blue-main text-white font-semibold py-3 px-4 rounded hover:bg-blue-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={handleProcessComplete}
-                      disabled={!selectedStatus}
-                    >
-                      처리 완료
-                    </button>
-                    <button 
-                      onClick={handleCloseDetailBox}
-                      className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
-                    >
-                      취소
-                    </button>
-                  </div>
+                <div className="flex gap-3 pt-6">
+                  <button 
+                    className="flex-1 bg-blue-main text-white font-semibold py-3 px-4 rounded hover:bg-blue-point transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleProcessComplete}
+                    disabled={!selectedStatus}
+                  >
+                    처리 완료
+                  </button>
+                  <button 
+                    onClick={handleCloseModal}
+                    className="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded hover:bg-gray-400 transition-colors"
+                  >
+                    취소
+                  </button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </AdminLayout>
   );
 }

@@ -69,6 +69,7 @@ const getMemberData = async () => {
           // 원본 데이터 저장
           memberId: member.memberId,
           originalData: member,
+          role: member.role,
         };
         
         // console.log("변환된 회원 데이터:", processedMember);
@@ -295,6 +296,12 @@ useEffect(() => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
                 <div className="p-3 bg-gray-50 rounded border">{selectedMember.이메일}</div>
               </div>
+              {authFile.resDto?.phoneNumber && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                        <div className="p-3 bg-gray-50 rounded border">{authFile.resDto.phoneNumber}</div>
+                      </div>
+                    )}
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">타입</label>
@@ -441,74 +448,128 @@ useEffect(() => {
                       )}
                     </div>
 
-                    {/* 전화번호 */}
-                    {authFile.resDto?.phoneNumber && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
-                        <div className="p-3 bg-gray-50 rounded border">{authFile.resDto.phoneNumber}</div>
-                      </div>
-                    )}
+                    
 
                     {/* 상세 정보 (detail이 있는 경우에만 표시) */}
                     {authFile.resDto?.detail && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">사업자 정보</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {(selectedMember.role === "MEMBER" ) ? "사업자" : 
+                           (selectedMember.role === "STUDENT" || selectedMember.originalData?.roleType === "STUDENT") ? "학생" : 
+                           "동아리"} 정보
+                        </label>
                         <div className="space-y-3 p-4 bg-gray-50 rounded border">
-                          {authFile.resDto.detail.companyName && (
-                            <div>
-                              <span className="text-xs text-gray-500">회사명</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.companyName}
-                              </div>
-                            </div>
+                          {/* 학생 계정 정보 */}
+                          {(selectedMember.role === "STUDENT" || selectedMember.originalData?.roleType === "STUDENT") && (
+                            <>
+                              {authFile.resDto.detail.educationType && (
+                                <div>
+                                  <span className="text-xs text-gray-500">유형</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.educationType === "UNIV" ? "대학교" : 
+                                     authFile.resDto.detail.educationType === "GRAD" ? "대학원" : 
+                                     authFile.resDto.detail.educationType}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.schoolName && (
+                                <div>
+                                  <span className="text-xs text-gray-500">학교명</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.schoolName}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.schoolEmail && (
+                                <div>
+                                  <span className="text-xs text-gray-500">학교 이메일</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.schoolEmail}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.specialties && authFile.resDto.detail.specialties.length > 0 && (
+                                <div>
+                                  <span className="text-xs text-gray-500">전공/전문분야</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.specialties.map((specialty, index) => (
+                                      <div key={index}>
+                                        {specialty.specialtyName} 
+                                        {specialty.specialtyType && (
+                                          <span className="text-xs text-gray-500 ml-2">
+                                            ({specialty.specialtyType === "MAJOR" ? "주전공" : 
+                                              specialty.specialtyType === "MINOR" ? "부전공" : 
+                                              specialty.specialtyType === "DOUBLE_MAJOR" ? "복수전공" : ""})
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
-                          {authFile.resDto.detail.businessClassification && (
-                            <div>
-                              <span className="text-xs text-gray-500">사업자 분류</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.businessClassification}
-                              </div>
-                            </div>
-                          )}
-                          {authFile.resDto.detail.businessRegistrationNumber && (
-                            <div>
-                              <span className="text-xs text-gray-500">사업자 등록번호</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.businessRegistrationNumber}
-                              </div>
-                            </div>
-                          )}
-                          {authFile.resDto.detail.businessStatus && (
-                            <div>
-                              <span className="text-xs text-gray-500">업태</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.businessStatus}
-                              </div>
-                            </div>
-                          )}
-                          {authFile.resDto.detail.zipCode && (
-                            <div>
-                              <span className="text-xs text-gray-500">우편번호</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.zipCode}
-                              </div>
-                            </div>
-                          )}
-                          {authFile.resDto.detail.roadNameAddress && (
-                            <div>
-                              <span className="text-xs text-gray-500">도로명 주소</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.roadNameAddress}
-                              </div>
-                            </div>
-                          )}
-                          {authFile.resDto.detail.detailedAddress && (
-                            <div>
-                              <span className="text-xs text-gray-500">상세 주소</span>
-                              <div className="text-sm font-medium text-gray-800 mt-1">
-                                {authFile.resDto.detail.detailedAddress}
-                              </div>
-                            </div>
+                          
+                          {/* 기업 계정 정보 */}
+                          {(selectedMember.role === "MEMBER" ) && (
+                            <>
+                              {authFile.resDto.detail.companyName && (
+                                <div>
+                                  <span className="text-xs text-gray-500">회사명</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.companyName}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.businessClassification && (
+                                <div>
+                                  <span className="text-xs text-gray-500">사업자 분류</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.businessClassification}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.businessRegistrationNumber && (
+                                <div>
+                                  <span className="text-xs text-gray-500">사업자 등록번호</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.businessRegistrationNumber}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.businessStatus && (
+                                <div>
+                                  <span className="text-xs text-gray-500">업태</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.businessStatus}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.zipCode && (
+                                <div>
+                                  <span className="text-xs text-gray-500">우편번호</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.zipCode}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.roadNameAddress && (
+                                <div>
+                                  <span className="text-xs text-gray-500">도로명 주소</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.roadNameAddress}
+                                  </div>
+                                </div>
+                              )}
+                              {authFile.resDto.detail.detailedAddress && (
+                                <div>
+                                  <span className="text-xs text-gray-500">상세 주소</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.detail.detailedAddress}
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
