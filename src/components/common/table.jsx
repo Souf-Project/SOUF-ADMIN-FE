@@ -5,7 +5,13 @@ export default function Table({ columns, data, renderAction, onRowClick, origina
         <thead className="bg-blue-200 border">
           <tr>
             {columns.map((col) => (
-              <th key={col.key} className="border p-2 text-left">{col.value}</th>
+              <th 
+                key={col.key} 
+                className="border p-2 text-left"
+                style={col.width ? { width: col.width, maxWidth: col.width } : {}}
+              >
+                {col.value}
+              </th>
             ))}
           </tr>
         </thead>
@@ -17,7 +23,11 @@ export default function Table({ columns, data, renderAction, onRowClick, origina
               onClick={() => onRowClick && onRowClick(row, originalData && originalData[idx])}
             >
               {columns.map((col) => (
-                <td key={col.key} className="border p-2">
+                <td 
+                  key={col.key} 
+                  className="border p-2"
+                  style={col.width ? { width: col.width, maxWidth: col.width } : {}}
+                >
                   {col.render ? col.render(row[col.key], row) : row[col.key]}
                 </td>
               ))}
