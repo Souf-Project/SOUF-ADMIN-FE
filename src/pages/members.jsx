@@ -296,13 +296,7 @@ useEffect(() => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
                 <div className="p-3 bg-gray-50 rounded border">{selectedMember.이메일}</div>
               </div>
-              {authFile.resDto?.phoneNumber && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
-                        <div className="p-3 bg-gray-50 rounded border">{authFile.resDto.phoneNumber}</div>
-                      </div>
-                    )}
-              
+             
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">타입</label>
                 <div className="p-3 bg-gray-50 rounded border">{selectedMember.타입}</div>
@@ -454,14 +448,22 @@ useEffect(() => {
                     {authFile.resDto?.detail && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {(selectedMember.role === "MEMBER" ) ? "사업자" : 
-                           (selectedMember.role === "STUDENT" || selectedMember.originalData?.roleType === "STUDENT") ? "학생" : 
+                          {(selectedMember.originalData?.roleType === "MEMBER" ) ? "사업자" : 
+                          (selectedMember.originalData?.roleType === "STUDENT" )? "학생" : 
                            "동아리"} 정보
                         </label>
                         <div className="space-y-3 p-4 bg-gray-50 rounded border">
                           {/* 학생 계정 정보 */}
                           {(selectedMember.role === "STUDENT" || selectedMember.originalData?.roleType === "STUDENT") && (
                             <>
+                            {authFile.resDto.phoneNumber && (
+                                <div>
+                                  <span className="text-xs text-gray-500">전화번호</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.phoneNumber}
+                                  </div>
+                                </div>
+                              )}
                               {authFile.resDto.detail.educationType && (
                                 <div>
                                   <span className="text-xs text-gray-500">유형</span>
@@ -513,6 +515,14 @@ useEffect(() => {
                           {/* 기업 계정 정보 */}
                           {(selectedMember.role === "MEMBER" ) && (
                             <>
+                              {authFile.resDto.phoneNumber && (
+                                <div>
+                                  <span className="text-xs text-gray-500">전화번호</span>
+                                  <div className="text-sm font-medium text-gray-800 mt-1">
+                                    {authFile.resDto.phoneNumber}
+                                  </div>
+                                </div>
+                              )}
                               {authFile.resDto.detail.companyName && (
                                 <div>
                                   <span className="text-xs text-gray-500">회사명</span>
