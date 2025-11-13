@@ -25,6 +25,7 @@ jobs:
         run: |
           echo "VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}" > .env
           echo "VITE_BASE_URL=https://api-souf.co.kr" > .env.production
+          echo "VITE_S3_BUCKET_URL=${{ secrets.VITE_S3_BUCKET_URL }}" > .env
 
       - name: Build project
         run: npm run build
