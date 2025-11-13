@@ -513,7 +513,7 @@ useEffect(() => {
                           )}
                           
                           {/* 기업 계정 정보 */}
-                          {(selectedMember.role === "MEMBER" ) && (
+                          {(selectedMember.originalData?.roleType === "MEMBER" ) && (
                             <>
                               {authFile.resDto.phoneNumber && (
                                 <div>
@@ -581,9 +581,26 @@ useEffect(() => {
                               )}
                             </>
                           )}
+                         
                         </div>
                       </div>
                     )}
+                     {(
+                            selectedMember.originalData?.roleType === "CLUB" && (
+                              <>
+                              {authFile.resDto.phoneNumber && (
+                                <div >
+                                   <span className="text-xs text-gray-500">연락처</span>
+                                  
+                                  <div className="p-4 bg-gray-50 rounded border text-sm mt-1">
+                                    {authFile.resDto.phoneNumber}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                            )
+                            
+                          )}
                   </div>
                 ) : (
                   <div className="text-gray-500 py-8 text-center">
