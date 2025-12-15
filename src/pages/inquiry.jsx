@@ -1,4 +1,4 @@
-import { getInquiry, patchInquiryStatus } from "../api/inquiry";
+import { getInquiry, patchInquiryStatus, getInquiryFile } from "../api/inquiry";
 import AdminLayout from "../components/layout/adminLayout";
 import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
@@ -139,9 +139,24 @@ useEffect(() => {
   getInquiryData();
 }, [currentPage, inquiryType, inquiryStatus]);
 
-const handleRowClick = (inquiry, originalData) => {
-  const inquiryData = originalData || inquiry;
-  setSelectedInquiry(inquiry);
+const handleRowClick = async (inquiry, originalData) => {
+  const inquiryData = originalData || inquiry.originalData || inquiry;
+  const inquiryId = inquiryData?.inquiryId;
+
+  if (!inquiryId) {
+    alert('문의 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    const inquiryFile = await getInquiryFile({ inquiryId });
+    console.log("문의 파일 응답:", inquiryFile);
+    setSelectedInquiry({ ...inquiry, inquiryFile, originalData: inquiryData });
+  } catch (error) {
+    console.error("문의 파일 조회 실패:", error);
+    setSelectedInquiry({ ...inquiry, inquiryFile: null, originalData: inquiryData });
+  }
+
   setShowModal(true);
   setSelectedStatus(null);
   setAnswer("");
