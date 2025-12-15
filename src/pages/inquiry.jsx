@@ -4,6 +4,8 @@ import Table from "../components/common/table";
 import Pagination from "../components/common/pagination";
 import { useState, useEffect } from "react";
 
+const VITE_S3_BUCKET_URL = import.meta.env.VITE_S3_BUCKET_URL || "";
+
 export default function Inquiry() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -294,10 +296,60 @@ const handleCloseModal = () => {
                   <div className="p-3 bg-gray-50 rounded border">{selectedInquiry["문의 상태"]}</div>
                 </div>
                 
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">이미지</h3>
-                <div className="text-gray-500 py-8 text-center">
-                  이미지가 없습니다.
-                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">첨부 파일</h3>
+                {(() => {
+                  const mediaList = selectedInquiry?.inquiryFile?.result?.mediaResDtoList 
+                    || selectedInquiry?.inquiryFile?.mediaResDtoList 
+                    || [];
+                  if (!mediaList.length) {
+                    return (
+                      <div className="text-gray-500 py-8 text-center">
+                        첨부된 파일이 없습니다.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="space-y-6">
+                      {mediaList.slice(0, 3).map((file, idx) => {
+                        const filePath = file?.fileUrl || "";
+                        const fullUrl = filePath.startsWith("http") ? filePath : `${VITE_S3_BUCKET_URL}${filePath}`;
+                        const ext = filePath.split(".").pop()?.toLowerCase();
+                        const isImage = ["jpg","jpeg","png","gif","webp","svg","bmp"].includes(ext);
+                        const isPdf = ext === "pdf";
+
+                        return (
+                          <div key={idx} className="space-y-2">
+                            <div className="text-sm text-gray-600">{file?.fileName || `파일 ${idx + 1}`}</div>
+                            {isImage ? (
+                              <img 
+                                src={fullUrl}
+                                alt={file?.fileName || "문의 첨부 이미지"}
+                                className="w-full rounded border max-h-[400px] object-contain"
+                                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; }}
+                              />
+                            ) : isPdf ? (
+                              <iframe
+                                src={fullUrl}
+                                className="w-full rounded border"
+                                style={{ height: "400px" }}
+                                title={file?.fileName || "문의 첨부 PDF"}
+                              />
+                            ) : (
+                              <a 
+                                href={fullUrl} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="text-blue-main hover:text-blue-point underline"
+                              >
+                                파일 열기
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
 
                 
               </div>
