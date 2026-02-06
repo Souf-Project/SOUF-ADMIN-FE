@@ -28,6 +28,16 @@ export const getInquiry = async ({ page, size, inquiryType, inquiryStatus }) => 
     }
 }
 
+export const getInquiryFile = async ({ inquiryId }) => {
+    try {
+        const response = await client.get(`/api/v1/inquiry/${inquiryId}`);
+        return response.data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
 export const patchInquiryStatus = async ({ inquiryId, answer, status }) => {
     try {
         const response = await client.patch(`/api/v1/admin/inquiry/${inquiryId}`, {
